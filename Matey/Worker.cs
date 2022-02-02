@@ -1,21 +1,21 @@
+using Matey.Backend;
+
 namespace Matey
 {
     public class Worker : BackgroundService
     {
+        private readonly IBackend backend;
         private readonly ILogger<Worker> _logger;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(IBackend backend, ILogger<Worker> logger)
         {
+            this.backend = backend;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
-            }
+            await backend.BeginMonitorAsync(stoppingToken);
         }
     }
 }
