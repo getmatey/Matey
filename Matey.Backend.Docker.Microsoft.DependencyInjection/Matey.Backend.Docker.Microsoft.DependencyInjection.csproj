@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Matey.Provider.Docker\Matey.Backend.Docker.csproj" />
+    <ProjectReference Include="..\Matey.Backend.Docker\Matey.Backend.Docker.csproj" />
   </ItemGroup>
 
 </Project>

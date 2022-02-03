@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Matey.Control\Matey.Frontend.csproj" />
+    <ProjectReference Include="..\Matey.Frontend\Matey.Frontend.csproj" />
   </ItemGroup>
 
 </Project>

@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Matey.Backend\Matey.Backend.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
-    <ProjectReference Include="..\Matey.Provider\Matey.Backend.csproj" />
   </ItemGroup>
 
 </Project>

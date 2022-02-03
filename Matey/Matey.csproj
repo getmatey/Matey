@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Matey.Backend.Docker.Microsoft.DependencyInjection\Matey.Backend.Docker.Microsoft.DependencyInjection.csproj" />
+    <ProjectReference Include="..\Matey.Backend\Matey.Backend.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
-    <ProjectReference Include="..\Matey.Provider\Matey.Backend.csproj" />
   </ItemGroup>
 </Project>
