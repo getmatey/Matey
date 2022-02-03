@@ -8,12 +8,12 @@ namespace Matey.Backend.Docker.Microsoft.DependencyInjection
     {
         public static IServiceCollection ConfigureDockerBackend(
             this IServiceCollection services,
-            Action<DockerEngineOptions> configureOptions)
+            Action<DockerOptions> configureOptions)
         {
-            services.AddOptions<DockerEngineOptions>().Configure(configureOptions);
+            services.AddOptions<DockerOptions>().Configure(configureOptions);
             services.AddTransient(sp =>
             {
-                IOptions<DockerEngineOptions> options = sp.GetRequiredService<IOptions<DockerEngineOptions>>();
+                IOptions<DockerOptions> options = sp.GetRequiredService<IOptions<DockerOptions>>();
 
                 return new DockerClientConfiguration(new Uri(options.Value.Endpoint)).CreateClient();
             });

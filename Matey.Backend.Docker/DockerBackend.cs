@@ -1,18 +1,26 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using Matey.Backend.Docker.Attributes;
 using Matey.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Matey.Backend.Docker
 {
     public class DockerBackend : IBackend
     {
+        private readonly IOptions<DockerOptions> options;
         private readonly DockerClient client;
         private readonly INotifier notifier;
         private readonly ILogger<DockerBackend> logger;
 
-        public DockerBackend(DockerClient client, INotifier notifier, ILogger<DockerBackend> logger)
+        public DockerBackend(
+            IOptions<DockerOptions> options,
+            DockerClient client,
+            INotifier notifier,
+            ILogger<DockerBackend> logger)
         {
+            this.options = options;
             this.client = client;
             this.notifier = notifier;
             this.logger = logger;
@@ -44,7 +52,9 @@ namespace Matey.Backend.Docker
 
         private void OnProgressChanged(object? sender, Message e)
         {
-            logger.LogInformation("Status: {0}, from: {1}, scope: {2}", e.Status, e.From, e.Scope);
+            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
+            IBackendServiceConfiguration configuration = new DockerBackendServiceConfiguration(attributes);
+            logger.LogInformation("Port: {0}\nEnabled: {1}", configuration.Port, configuration.IsEnabled);
         }
     }
 }

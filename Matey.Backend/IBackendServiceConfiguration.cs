@@ -6,7 +6,7 @@ namespace Matey.Backend
     {
         IFrontendServiceConfiguration Frontend { get; }
 
-        int Port { get; }
+        int? Port { get; }
 
         bool IsEnabled { get; }
     }
