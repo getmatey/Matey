@@ -6,24 +6,53 @@ namespace Matey.Backend.Docker.Attributes
     {
         private readonly string path;
         private readonly IDictionary<string, string> attributes;
+        private readonly IDictionary<string, IAttributeSection> subsections = new Dictionary<string, IAttributeSection>();
+        private readonly IDictionary<string, string> values = new Dictionary<string, string>();
+
+        public string Name { get; }
+
+        public IEnumerable<IAttributeSection> Sections => subsections.Values;
 
         internal AttributeSection(string path, IDictionary<string, string> attributes)
         {
+            Name = Path.Leaf(path);
             this.path = path;
             this.attributes = new Dictionary<string, string>(attributes.Where(p => p.Key.StartsWith(path)));
-        }
 
-        private static string Combine(string path, string key) => $"{path}{Paths.Delimiter}{key}";
+            foreach(var attribute in this.attributes)
+            {
+                // Child paths
+                string relative = Path.Child(path, attribute.Key);
+                string absolute = Path.Combine(path, relative);
+                
+                if (absolute == attribute.Key) // Value (leaf)
+                {
+                    values.Add(relative, attribute.Value);
+                }
+                else if(!subsections.ContainsKey(relative)) // Section
+                {
+                    subsections.Add(relative, new AttributeSection(absolute, this.attributes));
+                }
+            }
+        }
 
         public IAttributeSection GetSection(string key)
         {
-            return new AttributeSection(Combine(path, key), attributes);
+            if(key.Contains(Path.Delimiter))
+            {
+                string root = Path.Root(key);
+                return subsections[root].GetSection(Path.Relative(root, key));
+            }
+            else
+            {
+                return subsections[key];
+            }
         }
 
         public bool TryGetValue<T>(string key, out T? value) where T : struct
         {
             TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
-            if (attributes.TryGetValue(Combine(path, key), out string? source) &&
+            if (attributes.TryGetValue(Path.Combine(path, key), out string? source) &&
                 converter.CanConvertTo(typeof(T)) &&
                 converter.CanConvertFrom(typeof(string)))
             {
@@ -46,12 +75,28 @@ namespace Matey.Backend.Docker.Attributes
 
         public string GetString(string key)
         {
-            return attributes[Combine(path, key)];
+            if (key.Contains(Path.Delimiter))
+            {
+                string root = Path.Root(key);
+                return subsections[root].GetString(Path.Relative(root, key));
+            }
+            else
+            {
+                return values[key];
+            }
         }
 
         public bool TryGetString(string key, out string? value)
         {
-            return attributes.TryGetValue(Combine(path, key), out value);
+            if(key.Contains(Path.Delimiter))
+            {
+                string root = Path.Root(key);
+                return subsections[root].TryGetString(Path.Relative(root, key), out value);
+            }
+            else
+            {
+                return values.TryGetValue(key, out value);
+            }
         }
     }
 }
