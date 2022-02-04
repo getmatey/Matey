@@ -5,17 +5,17 @@ namespace Matey.Backend.Docker
 {
     public class DockerBackendServiceConfiguration : IBackendServiceConfiguration
     {
-        private IAttributeRoot attributes;
+        public string Name { get; }
 
-        public DockerBackendServiceConfiguration(IAttributeRoot attributes)
+        public IFrontendServiceConfiguration Frontend { get; }
+
+        public int? Port { get; }
+
+        public DockerBackendServiceConfiguration(IAttributeSection attributes)
         {
-            this.attributes = attributes;
+            Name = attributes.Name;
+            Port = attributes.GetValue<int>(Tokens.Port);
+            Frontend = new DockerFrontendServiceConfiguration(attributes.GetSection(Tokens.Frontend));
         }
-
-        public IFrontendServiceConfiguration Frontend => throw new NotImplementedException();
-
-        public int? Port => attributes.GetValue<int>(Paths.Port);
-
-        public bool IsEnabled => attributes.GetValue<bool>(Paths.Enabled) ?? true;
     }
 }

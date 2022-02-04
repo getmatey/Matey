@@ -4,6 +4,6 @@ namespace Matey.Frontend
 {
     public interface IFrontendServiceConfiguration
     {
-        ImmutableArray<string> Hostnames { get; }
+        string Rule { get; }
     }
 }

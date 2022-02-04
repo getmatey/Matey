@@ -2,6 +2,7 @@
 using Docker.DotNet.Models;
 using Matey.Backend.Docker.Attributes;
 using Matey.Common;
+using Matey.Frontend;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -53,8 +54,12 @@ namespace Matey.Backend.Docker
         private void OnProgressChanged(object? sender, Message e)
         {
             IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
-            IBackendServiceConfiguration configuration = new DockerBackendServiceConfiguration(attributes);
-            logger.LogInformation("Port: {0}\nEnabled: {1}", configuration.Port, configuration.IsEnabled);
+            IServiceConfiguration configuration = new DockerServiceConfiguration(attributes);
+            logger.LogInformation("ID: {0}, Enabled: {1}", e.ID, configuration.IsEnabled);
+            foreach(var backend in configuration.Backends)
+            {
+                logger.LogInformation("Backend: {0}, Port: {1}, Frontend rule: {2}", backend.Name, backend.Port, backend.Frontend.Rule);
+            }
         }
     }
 }
