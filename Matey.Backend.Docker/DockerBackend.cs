@@ -54,7 +54,7 @@ namespace Matey.Backend.Docker
         private void OnProgressChanged(object? sender, Message e)
         {
             IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
-            IServiceConfiguration configuration = new DockerServiceConfiguration(attributes);
+            IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(attributes);
             logger.LogInformation("ID: {0}, Enabled: {1}", e.ID, configuration.IsEnabled);
             foreach(var backend in configuration.Backends)
             {
