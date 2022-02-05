@@ -51,12 +51,10 @@ namespace Matey.Backend.Docker.Attributes
 
         public bool TryGetValue<T>(string key, out T? value) where T : struct
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
-            if (attributes.TryGetValue(Path.Combine(path, key), out string? source) &&
-                converter.CanConvertTo(typeof(T)) &&
-                converter.CanConvertFrom(typeof(string)))
+            object? valueObj = null;
+            if(TryGetValue(key, typeof(T), out valueObj))
             {
-                value = (T?)converter.ConvertFromString(source);
+                value = (T?)valueObj;
                 return true;
             }
             else
@@ -66,11 +64,33 @@ namespace Matey.Backend.Docker.Attributes
             }
         }
 
+        public bool TryGetValue(string key, Type type, out object? value)
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(type);
+            if (attributes.TryGetValue(Path.Combine(path, key), out string? source) &&
+                converter.CanConvertTo(type) &&
+                converter.CanConvertFrom(typeof(string)))
+            {
+                value = converter.ConvertFromString(source);
+                return true;
+            }
+            else
+            {
+                value = null;
+                return false;
+            }
+        }
+
         public T? GetValue<T>(string key) where T : struct
         {
+            return (T?)GetValue(key, typeof(T));
+        }
+
+        public object? GetValue(string key, Type type)
+        {
             string source = GetString(key);
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
-            return (T?)converter.ConvertFromString(source);
+            TypeConverter converter = TypeDescriptor.GetConverter(type);
+            return converter.ConvertFromString(source);
         }
 
         public string GetString(string key)

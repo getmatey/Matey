@@ -8,9 +8,13 @@
 
         bool TryGetValue<T>(string key, out T? value) where T : struct;
 
-        public T? GetValue<T>(string key) where T : struct;
+        bool TryGetValue(string key, Type type, out object? value);
 
-        public IAttributeSection GetSection(string key);
+        T? GetValue<T>(string key) where T : struct;
+
+        object? GetValue(string key, Type type);
+
+        IAttributeSection GetSection(string key);
 
         string GetString(string key);
 
