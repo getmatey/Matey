@@ -5,6 +5,7 @@ using Matey.Common;
 using Matey.Frontend;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace Matey.Backend.Docker
 {
@@ -53,13 +54,37 @@ namespace Matey.Backend.Docker
 
         private void OnProgressChanged(object? sender, Message e)
         {
-            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
-            IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(attributes);
-            logger.LogInformation("ID: {0}, Enabled: {1}", e.ID, configuration.IsEnabled);
-            foreach(var backend in configuration.Backends)
+            // Filter for identifier
+            IDictionary<string, IDictionary<string, bool>> filters = new Dictionary<string, IDictionary<string, bool>>
             {
-                logger.LogInformation("Backend: {0}, Port: {1}, Frontend rule: {2}", backend.Name, backend.Port, backend.Frontend.Rule);
-            }
+                {
+                    "id",
+                    new Dictionary<string, bool>
+                    {
+                        { e.ID, true }
+                    }
+                }
+            };
+
+            client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters })
+                .ContinueWith(t =>
+                {
+                    if (!t.IsFaulted && !t.IsCanceled)
+                    {
+                        ContainerListResponse container = t.Result.First();
+                        // TODO: Configurable network.
+                        EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
+                        IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
+                        IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
+                            attributes,
+                            a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
+                        logger.LogInformation("ID: {0}, Enabled: {1}", e.ID, configuration.IsEnabled);
+                        foreach (var backend in configuration.Backends)
+                        {
+                            logger.LogInformation("Backend: {0}, IP Address: {1}, Port: {2}, Frontend rule: {3}", backend.Name, backend.IPAddress, backend.Port, backend.Frontend.Rule);
+                        }
+                    }
+                });
         }
     }
 }
