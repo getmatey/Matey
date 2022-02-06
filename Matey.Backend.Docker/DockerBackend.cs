@@ -37,22 +37,37 @@ namespace Matey.Backend.Docker
                     "event",
                     new Dictionary<string, bool>
                     {
-                        { "start", true },
-                        { "stop", true },
-                        { "die", true }
+                        { DockerEvent.Start, true },
+                        { DockerEvent.Stop, true },
+                        { DockerEvent.Die, true }
                     }
                 }
             };
 
             // Hook for docker events
             Progress<Message> progress = new Progress<Message>();
-            progress.ProgressChanged += OnProgressChanged;
+            progress.ProgressChanged += OnContainerLifecycleEvent;
 
             // Begin monitoring
             await client.System.MonitorEventsAsync(new ContainerEventsParameters() { Filters = filters }, progress, cancellationToken);
         }
 
-        private void OnProgressChanged(object? sender, Message e)
+        private void OnContainerLifecycleEvent(object? sender, Message e)
+        {
+            switch (e.Action)
+            {
+                case DockerEvent.Start:
+                    OnContainerStart(sender, e);
+                    break;
+
+                case DockerEvent.Stop:
+                case DockerEvent.Die:
+                    OnContainerStop(sender, e);
+                    break;
+            }
+        }
+
+        private void OnContainerStart(object? sender, Message e)
         {
             // Filter for identifier
             IDictionary<string, IDictionary<string, bool>> filters = new Dictionary<string, IDictionary<string, bool>>
@@ -85,6 +100,11 @@ namespace Matey.Backend.Docker
                         }
                     }
                 });
+        }
+
+        private void OnContainerStop(object? sender, Message e)
+        {
+
         }
     }
 }
