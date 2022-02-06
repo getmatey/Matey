@@ -1,6 +1,6 @@
 ﻿namespace Matey.Backend.Docker
 {
-    public class ConfigurationDefault
+    public class DockerConfigurationDefault
     {
         public const string DockerEndpoint = "npipe://./pipe/docker_engine";
 
