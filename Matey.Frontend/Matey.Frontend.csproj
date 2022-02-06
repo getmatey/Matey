@@ -10,4 +10,8 @@
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
+  </ItemGroup>
+
 </Project>

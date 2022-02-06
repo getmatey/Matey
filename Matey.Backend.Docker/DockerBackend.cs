@@ -54,22 +54,38 @@ namespace Matey.Backend.Docker
 
         private void OnContainerLifecycleEvent(object? sender, Message e)
         {
+            Task? task = null;
             switch (e.Action)
             {
                 case DockerEvent.Start:
-                    OnContainerStart(sender, e);
+                    task = OnContainerStartAsync(sender, e);
                     break;
 
                 case DockerEvent.Stop:
                 case DockerEvent.Die:
-                    OnContainerStop(sender, e);
+                    task = OnContainerStopAsync(sender, e);
                     break;
+            }
+
+            // Log uncaught task exceptions.
+            if(task is not null)
+            {
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted && t.Exception is not null)
+                    {
+                        foreach (Exception ex in t.Exception.InnerExceptions)
+                        {
+                            logger.LogError(ex, "An error occurred while handing a container event.");
+                        }
+                    }
+                });
             }
         }
 
-        private void OnContainerStart(object? sender, Message e)
+        private async Task OnContainerStartAsync(object? sender, Message e)
         {
-            // Filter for identifier
+            // Filter by the container identifier
             IDictionary<string, IDictionary<string, bool>> filters = new Dictionary<string, IDictionary<string, bool>>
             {
                 {
@@ -81,30 +97,26 @@ namespace Matey.Backend.Docker
                 }
             };
 
-            client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters })
-                .ContinueWith(t =>
-                {
-                    if (!t.IsFaulted && !t.IsCanceled)
-                    {
-                        ContainerListResponse container = t.Result.First();
-                        // TODO: Configurable network.
-                        EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
-                        IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
-                        IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
-                            attributes,
-                            a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
-                        logger.LogInformation("ID: {0}, Enabled: {1}", e.ID, configuration.IsEnabled);
-                        foreach (var backend in configuration.Backends)
-                        {
-                            logger.LogInformation("Backend: {0}, IP Address: {1}, Port: {2}, Frontend rule: {3}", backend.Name, backend.IPAddress, backend.Port, backend.Frontend.Rule);
-                        }
-                    }
-                });
+            // Find the container which caused the start event.
+            IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters });
+            ContainerListResponse container = containers.First();
+            
+            // TODO: Configurable network.
+            EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
+
+            // Build a service configuration from the container attributes.
+            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
+            IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
+                attributes,
+                a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
+            
+            // Notify listeners that the service is online.
+            await notifier.NotifyAsync(new ServiceOnlineNotification(configuration));
         }
 
-        private void OnContainerStop(object? sender, Message e)
+        private Task OnContainerStopAsync(object? sender, Message e)
         {
-
+            return Task.CompletedTask;
         }
     }
 }
