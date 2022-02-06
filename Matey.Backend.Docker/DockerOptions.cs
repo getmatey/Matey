@@ -2,8 +2,8 @@
 {
     public class DockerOptions
     {
-        public string Endpoint { get; init; } = Defaults.DOCKER_ENDPOINT;
+        public string Endpoint { get; init; } = ConfigurationDefault.DockerEndpoint;
 
-        public string LabelPrefix { get; init; } = Defaults.LABEL_PREFIX;
+        public string LabelPrefix { get; init; } = ConfigurationDefault.LabelPrefix;
     }
 }

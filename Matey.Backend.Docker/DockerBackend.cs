@@ -105,7 +105,7 @@ namespace Matey.Backend.Docker
             EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
 
             // Build a service configuration from the container attributes.
-            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? Defaults.LABEL_PREFIX, e.Actor.Attributes);
+            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? ConfigurationDefault.LabelPrefix, e.Actor.Attributes);
             IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
                 attributes,
                 a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
