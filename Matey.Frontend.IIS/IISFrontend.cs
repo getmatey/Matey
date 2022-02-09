@@ -4,7 +4,7 @@ using System.Net;
 using Matey.Frontend.IIS.Configuration;
 using System.Xml.Serialization;
 using System.Xml;
-using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Matey.Frontend.IIS
 {
@@ -12,11 +12,13 @@ namespace Matey.Frontend.IIS
     {
         private readonly IOptions<IISOptions> options;
         private readonly Administration.ServerManager serverManager;
+        private readonly ILogger<IISFrontend> logger;
 
-        public IISFrontend(IOptions<IISOptions> options, Administration.ServerManager serverManager)
+        public IISFrontend(IOptions<IISOptions> options, Administration.ServerManager serverManager, ILogger<IISFrontend> logger)
         {
             this.options = options;
             this.serverManager = serverManager;
+            this.logger = logger;
         }
 
         private static string CreateUniqueFrontendName(string serviceProvider, string serviceName, string backendName)
@@ -67,6 +69,8 @@ namespace Matey.Frontend.IIS
                 Administration.Configuration configuration = site.GetWebConfiguration();
                 site.ServerAutoStart = true;
                 serverManager.CommitChanges();
+
+                logger.LogInformation("Added website '{0}'.", websiteName);
             }
         }
 
@@ -80,6 +84,8 @@ namespace Matey.Frontend.IIS
                 serverManager.Sites.Remove(site);
                 serverManager.CommitChanges();
                 Directory.Delete(websitePath, true);
+
+                logger.LogInformation("Removed website '{0}'.", websiteName);
             }
 
             return Task.CompletedTask;
