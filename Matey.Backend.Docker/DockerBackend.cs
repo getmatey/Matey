@@ -108,6 +108,7 @@ namespace Matey.Backend.Docker
             IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? DockerConfigurationDefault.LabelPrefix, e.Actor.Attributes);
             IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
                 attributes,
+                e.Actor.Attributes["name"],
                 a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
             
             // Notify listeners that the service is online.

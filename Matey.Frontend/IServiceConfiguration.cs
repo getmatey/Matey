@@ -4,8 +4,8 @@ namespace Matey.Frontend
 {
     public interface IServiceConfiguration
     {
-        public ImmutableArray<IBackendServiceConfiguration> Backends { get; }
-
+        public string Name { get; }
         public bool IsEnabled { get; }
+        public ImmutableArray<IBackendServiceConfiguration> Backends { get; }
     }
 }

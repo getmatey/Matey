@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 namespace Matey.Backend.Docker
 {
     internal record DockerServiceConfiguration(
-        ImmutableArray<IBackendServiceConfiguration> Backends,
-        bool IsEnabled) : IServiceConfiguration;
+        string Name,
+        bool IsEnabled,
+        ImmutableArray<IBackendServiceConfiguration> Backends) : IServiceConfiguration;
 }
