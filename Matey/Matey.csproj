@@ -20,5 +20,6 @@
     <ProjectReference Include="..\Matey.Backend.Docker.Microsoft.DependencyInjection\Matey.Backend.Docker.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\Matey.Backend\Matey.Backend.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
+    <ProjectReference Include="..\Matey.Frontend.IIS.Microsoft.DependencyInjection\Matey.Frontend.IIS.Microsoft.DependencyInjection.csproj" />
   </ItemGroup>
 </Project>
