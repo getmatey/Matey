@@ -1,4 +1,9 @@
-﻿namespace Matey.Frontend
+﻿using System.Collections.Immutable;
+
+namespace Matey.Frontend
 {
-    public record ServiceOfflineNotification() : IServiceNotification;
+    public record ServiceOfflineNotification(
+        string Provider,
+        string ServiceName,
+        ImmutableArray<string> Backends) : IServiceNotification;
 }

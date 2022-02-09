@@ -5,6 +5,7 @@ using Matey.Common;
 using Matey.Frontend;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Collections.Immutable;
 using System.Net;
 
 namespace Matey.Backend.Docker
@@ -15,6 +16,7 @@ namespace Matey.Backend.Docker
         private readonly DockerClient client;
         private readonly INotifier notifier;
         private readonly ILogger<DockerBackend> logger;
+        internal const string ProviderName = "docker";
 
         public DockerBackend(
             IOptions<DockerOptions> options,
@@ -26,6 +28,11 @@ namespace Matey.Backend.Docker
             this.client = client;
             this.notifier = notifier;
             this.logger = logger;
+        }
+
+        private string GetLabelPrefix()
+        {
+            return options.Value?.LabelPrefix ?? DockerConfigurationDefault.LabelPrefix;
         }
 
         public async Task BeginMonitorAsync(CancellationToken cancellationToken)
@@ -105,7 +112,7 @@ namespace Matey.Backend.Docker
             EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
 
             // Build a service configuration from the container attributes.
-            IAttributeRoot attributes = new AttributeRoot(options.Value?.LabelPrefix ?? DockerConfigurationDefault.LabelPrefix, e.Actor.Attributes);
+            IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
             IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
                 attributes,
                 e.Actor.Attributes["name"],
@@ -115,9 +122,14 @@ namespace Matey.Backend.Docker
             await notifier.NotifyAsync(new ServiceOnlineNotification(configuration));
         }
 
-        private Task OnContainerStopAsync(object? sender, Message e)
+        private async Task OnContainerStopAsync(object? sender, Message e)
         {
-            return Task.CompletedTask;
+            string serviceName = e.Actor.Attributes["name"];
+            IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
+            await notifier.NotifyAsync(new ServiceOfflineNotification(
+                ProviderName,
+                serviceName,
+                attributes.Sections.Where(s => Tokens.Reserved.Contains(s.Name)).Select(s => s.Name).ToImmutableArray()));
         }
     }
 }

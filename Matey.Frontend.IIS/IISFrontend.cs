@@ -17,7 +17,12 @@ namespace Matey.Frontend.IIS
         {
             this.options = options;
             this.serverManager = serverManager;
-        }    
+        }
+
+        private static string CreateUniqueFrontendName(string serviceProvider, string serviceName, string backendName)
+        {
+            return $"{serviceProvider}.{serviceName}.{backendName}";
+        }
 
         public async Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
         {
@@ -28,7 +33,7 @@ namespace Matey.Frontend.IIS
                 int? port = backend.Port ?? 80;
                 string rule = backend.Frontend.Rule;
                 string hostname = rule.Substring("Host:".Length).Trim();
-                string websiteName = $"docker.{service.Name}.{backend.Name}";
+                string websiteName = CreateUniqueFrontendName(service.Provider, service.Name, backend.Name);
                 string websitePath = Path.Combine(options.Value.WebsitesPath, websiteName);
                 Directory.CreateDirectory(websitePath);
 
@@ -67,7 +72,17 @@ namespace Matey.Frontend.IIS
 
         public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            foreach(string backend in notification.Backends)
+            {
+                string websiteName = CreateUniqueFrontendName(notification.Provider, notification.ServiceName, backend);
+                string websitePath = Path.Combine(options.Value.WebsitesPath, websiteName);
+                Administration.Site site = serverManager.Sites[websiteName];
+                serverManager.Sites.Remove(site);
+                serverManager.CommitChanges();
+                Directory.Delete(websitePath, true);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

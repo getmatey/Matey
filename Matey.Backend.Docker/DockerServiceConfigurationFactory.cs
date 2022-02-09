@@ -12,6 +12,7 @@ namespace Matey.Backend.Docker
             Func<IAttributeSection, DockerBackendServiceConfiguration> backendConfigurationFactory)
             => new DockerServiceConfiguration(
                 Name: containerName,
+                Provider: "docker",
                 IsEnabled: attributes.GetValue<bool>(Tokens.Enabled) ?? true,
                 Backends: attributes.Sections
                     .Where(s => !Tokens.Reserved.Contains(s.Name))
