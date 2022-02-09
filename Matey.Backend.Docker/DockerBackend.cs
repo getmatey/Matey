@@ -129,7 +129,7 @@ namespace Matey.Backend.Docker
             await notifier.NotifyAsync(new ServiceOfflineNotification(
                 ProviderName,
                 serviceName,
-                attributes.Sections.Where(s => Tokens.Reserved.Contains(s.Name)).Select(s => s.Name).ToImmutableArray()));
+                attributes.Sections.Where(s => !Tokens.Reserved.Contains(s.Name)).Select(s => s.Name).ToImmutableArray()));
         }
     }
 }
