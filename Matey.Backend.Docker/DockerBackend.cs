@@ -62,6 +62,9 @@ namespace Matey.Backend.Docker
         private void OnContainerLifecycleEvent(object? sender, Message e)
         {
             Task? task = null;
+            string containerName = e.Actor.Attributes["name"];
+
+            logger.LogDebug("Event '{0}' on container '{1}'", e.Action, containerName);
             switch (e.Action)
             {
                 case DockerEvent.Start:
@@ -83,7 +86,7 @@ namespace Matey.Backend.Docker
                     {
                         foreach (Exception ex in t.Exception.InnerExceptions)
                         {
-                            logger.LogError(ex, "An error occurred while handing a container event.");
+                            logger.LogError(ex, "An error occurred while handing '{0}' event on container '{1}'.", e.Action, containerName);
                         }
                     }
                 });
