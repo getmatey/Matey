@@ -1,8 +1,9 @@
-﻿using Matey.Backend.Docker.Attributes;
-using System.Net;
+﻿using System.Net;
 
 namespace Matey.Backend.Docker
 {
+    using Attributes;
+
     internal static class DockerBackendServiceConfigurationFactory
     {
         internal static DockerBackendServiceConfiguration Create(IAttributeSection attributes, IPAddress ipAddress)

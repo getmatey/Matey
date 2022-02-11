@@ -1,4 +1,4 @@
-﻿namespace Matey.Backend
+﻿namespace Matey.Backend.Abstractions
 {
     public interface IBackend
     {

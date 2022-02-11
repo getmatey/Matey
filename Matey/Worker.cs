@@ -1,7 +1,7 @@
-using Matey.Backend;
-
 namespace Matey
 {
+    using Backend.Abstractions;
+
     public class Worker : BackgroundService
     {
         private readonly IBackend backend;

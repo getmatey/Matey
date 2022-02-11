@@ -2,9 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Matey.Backend.Docker.Microsoft.DependencyInjection
+namespace Matey.Backend.Docker
 {
-    public static class Extensions
+    using Abstractions;
+
+    public static class ConfigureServicesExtensions
     {
         public static IServiceCollection ConfigureDockerBackend(
             this IServiceCollection services,

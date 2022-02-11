@@ -1,9 +1,10 @@
-﻿using Matey.Backend.Docker.Attributes;
-using Matey.Frontend;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace Matey.Backend.Docker
 {
+    using Abstractions;
+    using Attributes;
+
     internal static class DockerServiceConfigurationFactory
     {
         internal static DockerServiceConfiguration Create(

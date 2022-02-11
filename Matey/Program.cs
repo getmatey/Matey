@@ -1,7 +1,9 @@
 using Matey;
-using Matey.Backend.Docker.Microsoft.DependencyInjection;
+using Matey.Backend.Abstractions;
+using Matey.Backend.Docker;
 using Matey.Common;
-using Matey.Frontend.IIS.Microsoft.DependencyInjection;
+using Matey.Common.Microsoft.DependencyInjection;
+using Matey.Frontend.IIS;
 using MediatR;
 
 IHost host = Host.CreateDefaultBuilder(args)
@@ -13,6 +15,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddTransient<INotifier, MediatorNotifierAdapter>();
         services.ConfigureDockerBackend(options => configuration.Bind("Docker", options));
         services.ConfigureIISFrontend(options => configuration.Bind("IIS", options));
+        services.AddTransient<ServiceBroker>();
+        services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<ServiceBroker>());
+        services.AddNotificationHandler<ServiceOfflineNotification>(sp => sp.GetRequiredService<ServiceBroker>());
         services.AddHostedService<Worker>();
     })
     .Build();

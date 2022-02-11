@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Matey.Common.Microsoft.DependencyInjection\Matey.Common.Microsoft.DependencyInjection.csproj" />
-    <ProjectReference Include="..\Matey.Frontend\Matey.Frontend.csproj" />
+    <ProjectReference Include="..\Matey.Frontend\Matey.Frontend.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

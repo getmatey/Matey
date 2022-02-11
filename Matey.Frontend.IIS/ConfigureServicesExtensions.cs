@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Web.Administration;
 
-namespace Matey.Frontend.IIS.Microsoft.DependencyInjection
+namespace Matey.Frontend.IIS
 {
-    public static class Extensions
+    public static class ConfigureServicesExtensions
     {
         public static IServiceCollection ConfigureIISFrontend(this IServiceCollection services, Action<IISOptions> configureOptions)
         {

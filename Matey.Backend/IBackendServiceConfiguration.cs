@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Matey.Frontend
+namespace Matey.Backend.Abstractions
 {
     public interface IBackendServiceConfiguration
     {

@@ -9,6 +9,7 @@ namespace Matey.Backend.Docker.Attributes
         internal const string Enabled = "enabled";
         internal const string Rule = "rule";
         internal const string Docker = "docker";
+        internal const string Provider = "provider";
         internal static ImmutableHashSet<string> Reserved = (new string[] {
             Docker,
             Enabled

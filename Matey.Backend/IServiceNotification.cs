@@ -1,7 +1,7 @@
-﻿using Matey.Common;
-
-namespace Matey.Frontend
+﻿namespace Matey.Backend.Abstractions
 {
+    using Common;
+
     public interface IServiceNotification : INotification
     {
         

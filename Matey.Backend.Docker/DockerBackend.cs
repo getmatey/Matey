@@ -1,8 +1,5 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
-using Matey.Backend.Docker.Attributes;
-using Matey.Common;
-using Matey.Frontend;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
@@ -10,6 +7,10 @@ using System.Net;
 
 namespace Matey.Backend.Docker
 {
+    using Abstractions;
+    using Attributes;
+    using Common;
+
     public class DockerBackend : IBackend
     {
         private readonly IOptions<DockerOptions> options;

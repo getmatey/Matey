@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Matey.Frontend
+namespace Matey.Backend.Abstractions
 {
     public record ServiceOfflineNotification(
         string Provider,

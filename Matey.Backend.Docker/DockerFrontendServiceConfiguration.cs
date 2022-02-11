@@ -1,6 +1,6 @@
-﻿using Matey.Frontend;
-
-namespace Matey.Backend.Docker
+﻿namespace Matey.Backend.Docker
 {
-    internal record DockerFrontendServiceConfiguration(string Rule) : IFrontendServiceConfiguration;
+    using Abstractions;
+
+    internal record DockerFrontendServiceConfiguration(string? Provider, string Rule) : IFrontendServiceConfiguration;
 }

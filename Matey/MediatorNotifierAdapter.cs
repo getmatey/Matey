@@ -1,7 +1,7 @@
-﻿using Matey.Common;
-
-namespace Matey
+﻿namespace Matey
 {
+    using Common;
+
     internal class MediatorNotifierAdapter : INotifier
     {
         public MediatR.IMediator mediator;

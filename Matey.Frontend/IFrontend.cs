@@ -1,8 +1,13 @@
-﻿using Matey.Common;
-
-namespace Matey.Frontend
+﻿namespace Matey.Frontend.Abstractions
 {
-    public interface IFrontend : INotificationHandler<ServiceOnlineNotification>, INotificationHandler<ServiceOfflineNotification>
+    using Common;
+
+    public interface IFrontend
     {
+        string Name { get; }
+
+        Task AddInboundProxyAsync(InboundProxySite site);
+
+        Task RemoveSiteAsync(SiteIdentifier identifier);
     }
 }
