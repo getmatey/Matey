@@ -5,11 +5,11 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey", "Matey\Matey.csproj", "{CE93DCA2-8D01-446D-BC1A-7A0D8105A992}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Backend.Abstractions", "Matey.Backend\Matey.Backend.Abstractions.csproj", "{3C054600-8706-4B59-9E73-F1ED7D7928A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Backend.Abstractions", "Matey.Backend.Abstractions\Matey.Backend.Abstractions.csproj", "{3C054600-8706-4B59-9E73-F1ED7D7928A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Backend.Docker", "Matey.Backend.Docker\Matey.Backend.Docker.csproj", "{5ED91347-2E0D-43D7-AA6C-4F637F908F55}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Frontend.Abstractions", "Matey.Frontend\Matey.Frontend.Abstractions.csproj", "{44D1ABB4-9F91-49BF-B684-3DE78B15BA38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Frontend.Abstractions", "Matey.Frontend.Abstractions\Matey.Frontend.Abstractions.csproj", "{44D1ABB4-9F91-49BF-B684-3DE78B15BA38}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matey.Frontend.IIS", "Matey.Frontend.IIS\Matey.Frontend.IIS.csproj", "{EFA53847-B933-422C-AAE3-E65D2830973C}"
 EndProject

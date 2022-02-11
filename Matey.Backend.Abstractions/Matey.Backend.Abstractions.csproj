@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Matey.Frontend\Matey.Frontend.Abstractions.csproj" />
+    <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
   </ItemGroup>
 
 </Project>

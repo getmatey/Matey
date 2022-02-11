@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Matey.Backend.Docker\Matey.Backend.Docker.csproj" />
-    <ProjectReference Include="..\Matey.Backend\Matey.Backend.Abstractions.csproj" />
+    <ProjectReference Include="..\Matey.Backend.Abstractions\Matey.Backend.Abstractions.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
     <ProjectReference Include="..\Matey.Frontend.IIS\Matey.Frontend.IIS.csproj" />
   </ItemGroup>

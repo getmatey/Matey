@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Matey.Backend\Matey.Backend.Abstractions.csproj" />
+    <ProjectReference Include="..\Matey.Backend.Abstractions\Matey.Backend.Abstractions.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
   </ItemGroup>
 
