@@ -7,6 +7,7 @@ namespace Matey.Backend.Docker
     internal record DockerServiceConfiguration(
         string Name,
         string Provider,
+        string Domain,
         bool IsEnabled,
         ImmutableArray<IBackendServiceConfiguration> Backends) : IServiceConfiguration;
 }

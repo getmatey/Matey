@@ -7,6 +7,6 @@
         internal static DockerFrontendServiceConfiguration Create(IAttributeSection attributes)
             => new DockerFrontendServiceConfiguration(
                 Provider: attributes.TryGetString(Tokens.Provider, out string? provider) ? provider : null,
-                Rule: attributes.GetString(Tokens.Rule));
+                Rule: attributes.TryGetString(Tokens.Rule, out string? rule) ? rule : null);
     }
 }

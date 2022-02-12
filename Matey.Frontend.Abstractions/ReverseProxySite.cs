@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Matey.Frontend.Abstractions
 {
-    public record InboundProxySite(SiteIdentifier Identifier, string Hostname, int Port, ProxyForwardDestination Destination);
+    public record ReverseProxySite(SiteIdentifier Identifier, string Domain, int Port, ProxyForwardDestination Destination);
 }

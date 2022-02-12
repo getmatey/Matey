@@ -2,7 +2,7 @@
 
 namespace Matey.Frontend.IIS.Configuration
 {
-    public class RewriteActionRule
+    public class RewriteRuleAction
     {
         [XmlAttribute(AttributeName = "type")]
         public string? Type { get; set; }

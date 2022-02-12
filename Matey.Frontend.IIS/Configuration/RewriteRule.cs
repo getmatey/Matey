@@ -16,6 +16,6 @@ namespace Matey.Frontend.IIS.Configuration
         public RewriteMatchRule? Match { get; set; }
 
         [XmlElement(ElementName = "action")]
-        public RewriteActionRule? Action { get; set; }
+        public RewriteRuleAction? Action { get; set; }
     }
 }

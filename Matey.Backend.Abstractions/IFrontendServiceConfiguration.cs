@@ -3,6 +3,6 @@
     public interface IFrontendServiceConfiguration
     {
         string? Provider { get; }
-        string Rule { get; }
+        string? Rule { get; }
     }
 }

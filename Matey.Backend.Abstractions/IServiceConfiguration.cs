@@ -6,6 +6,7 @@ namespace Matey.Backend.Abstractions
     {
         public string Name { get; }
         public string Provider { get; }
+        public string Domain { get; }
         public bool IsEnabled { get; }
         public ImmutableArray<IBackendServiceConfiguration> Backends { get; }
     }

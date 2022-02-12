@@ -1,13 +1,13 @@
 ﻿namespace Matey.Frontend.Abstractions
 {
-    using Common;
-
     public interface IFrontend
     {
         string Name { get; }
 
-        Task AddInboundProxyAsync(InboundProxySite site);
+        void AddReverseProxy(ReverseProxySite site);
 
-        Task RemoveSiteAsync(SiteIdentifier identifier);
+        IEnumerable<ReverseProxySite> GetInboundProxies();
+
+        void RemoveSite(SiteIdentifier identifier);
     }
 }

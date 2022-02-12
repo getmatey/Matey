@@ -2,8 +2,10 @@
 {
     public class IISOptions
     {
-        public string WebsitesPath { get; init; } = IISConfigurationDefault.WebsitesPath;
+        public string WebsitesPath { get; init; } = IISOptionsDefaults.WebsitesPath;
 
-        public string SiteIdentifierDelimiter { get; init; } = IISConfigurationDefault.SiteIdentifierDelimiter;
+        public string SiteNameDelimiter { get; init; } = IISOptionsDefaults.SiteNameDelimiter;
+
+        public string SiteNamePrefix { get; init; } = IISOptionsDefaults.SiteNamePrefix;
     }
 }
