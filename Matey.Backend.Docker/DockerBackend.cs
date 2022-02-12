@@ -33,7 +33,7 @@ namespace Matey.Backend.Docker
 
         private string GetLabelPrefix()
         {
-            return options.Value?.LabelPrefix ?? DockerConfigurationDefault.LabelPrefix;
+            return options.Value?.LabelPrefix ?? DockerOptionsDefaults.LabelPrefix;
         }
 
         public async Task BeginMonitorAsync(CancellationToken cancellationToken)
