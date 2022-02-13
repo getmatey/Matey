@@ -2,11 +2,21 @@
 
 namespace Matey.Frontend.Abstractions
 {
-    public record SiteIdentifier(ImmutableArray<string> Value)
+    public record SiteIdentifier(string Provider, string Name, string Id)
     {
-        public static SiteIdentifier Create(params string[] Parts)
+        public override int GetHashCode()
         {
-            return new SiteIdentifier(ImmutableArray.Create(Parts));
+            return HashCode.Combine(Provider, Name, Id);
+        }
+
+        public override string ToString()
+        {
+            return ToString(".");
+        }
+
+        public string ToString(string delimiter)
+        {
+            return $"{Provider}{delimiter}{Name}{delimiter}{Id}";
         }
     }
 }

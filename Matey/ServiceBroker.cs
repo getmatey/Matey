@@ -2,55 +2,83 @@
 
 namespace Matey
 {
-    using Common;
     using Backend.Abstractions;
     using Frontend.Abstractions;
+    using Synchronization;
 
-    public class ServiceBroker : INotificationHandler<ServiceOnlineNotification>, INotificationHandler<ServiceOfflineNotification>
+    public class ServiceBroker : IServiceBroker
     {
         private readonly IDictionary<string, IFrontend> frontends;
+        private readonly IEnumerable<IBackend> backends;
+        private readonly ILogger<ServiceBroker> logger;
 
-        public ServiceBroker(IEnumerable<IFrontend> frontends)
+        public ServiceBroker(
+            IEnumerable<IFrontend> frontends,
+            IEnumerable<IBackend> backends,
+            ILogger<ServiceBroker> logger)
         {
             this.frontends = frontends.ToDictionary(f => f.Name);
+            this.backends = backends;
+            this.logger = logger;
         }
+
 
         private IFrontend DefaultFrontend()
         {
             return frontends.First().Value;
         }
 
-        public async Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
+        private IFrontend SelectedFrontend(IServiceConfiguration serviceConfiguration)
         {
-            foreach(IBackendServiceConfiguration backend in notification.Configuration.Backends)
-            {
-                (IFrontendServiceConfiguration Frontend,
-                IBackendServiceConfiguration Backend,
-                IServiceConfiguration Service) Configuration = (backend.Frontend, backend, notification.Configuration);
-
-                IFrontend frontend = Configuration.Frontend.Provider == null ? DefaultFrontend() : frontends[Configuration.Frontend.Provider];
-                SiteIdentifier identifier = SiteIdentifier.Create(Configuration.Service.Provider, Configuration.Service.Name, Configuration.Backend.Name);
-                string hostname = Configuration.Frontend.Rule.Substring("Host:".Length).Trim();
-
-                await frontend.AddInboundProxyAsync(
-                    new InboundProxySite(
-                        identifier,
-                        hostname, 80,
-                        new ProxyForwardDestination(
-                            "http",
-                            new IPEndPoint(Configuration.Backend.IPAddress, Configuration.Backend.Port ?? 80))));
-            }
+            return serviceConfiguration.Target == null ? DefaultFrontend() : frontends[serviceConfiguration.Target];
         }
 
-        public async Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
+        public void Synchronize()
         {
-            foreach(string backend in notification.Backends)
+            SitesSynchronizer synchronizer = new SitesSynchronizer();
+            foreach(IFrontend frontend in frontends.Values)
             {
-                SiteIdentifier identifier = SiteIdentifier.Create(notification.Provider, notification.ServiceName, backend);
-                // TODO: Read front-end
-                IFrontend frontend = DefaultFrontend();
-                await frontend.RemoveSiteAsync(identifier);
+                foreach(SiteIdentifier siteIdentifier in frontend.GetSiteIdentifiers())
+                {
+                    synchronizer.Add(new HostedSite(siteIdentifier, frontend));
+                }
             }
+
+            foreach(IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
+            {
+                synchronizer.Add(new ReverseProxySpecification(
+                    serviceConfiguration.CreateReverseProxySite(),
+                    SelectedFrontend(serviceConfiguration)));
+            }
+
+            synchronizer.Synchronize();
+        }
+
+        public Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
+        {
+            IServiceConfiguration serviceConfiguration = notification.Configuration;
+            SiteIdentifier identifier = serviceConfiguration.CreateSiteIdentifier();
+            AddReverseProxy(identifier, serviceConfiguration);
+
+            return Task.CompletedTask;
+        }
+
+        private void AddReverseProxy(SiteIdentifier identifier, IServiceConfiguration serviceConfiguration)
+        {
+            IFrontend target = SelectedFrontend(serviceConfiguration); ;
+
+            target.AddReverseProxy(serviceConfiguration.CreateReverseProxySite());
+        }
+
+        public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
+        {
+            SiteIdentifier identifier = new SiteIdentifier(notification.Provider, notification.ServiceName, notification.ServiceId);
+
+            // TODO: Read front-end
+            IFrontend frontend = DefaultFrontend();
+            frontend.RemoveSite(identifier);
+
+            return Task.CompletedTask;
         }
     }
 }

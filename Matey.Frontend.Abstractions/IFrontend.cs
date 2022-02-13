@@ -6,7 +6,7 @@
 
         void AddReverseProxy(ReverseProxySite site);
 
-        IEnumerable<ReverseProxySite> GetInboundProxies();
+        IEnumerable<SiteIdentifier> GetSiteIdentifiers();
 
         void RemoveSite(SiteIdentifier identifier);
     }

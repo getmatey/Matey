@@ -15,9 +15,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddTransient<INotifier, MediatorNotifierAdapter>();
         services.ConfigureDockerBackend(options => configuration.Bind("Docker", options));
         services.ConfigureIISFrontend(options => configuration.Bind("IIS", options));
-        services.AddTransient<ServiceBroker>();
-        services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<ServiceBroker>());
-        services.AddNotificationHandler<ServiceOfflineNotification>(sp => sp.GetRequiredService<ServiceBroker>());
+        services.AddTransient<IServiceBroker, ServiceBroker>();
+        services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
+        services.AddNotificationHandler<ServiceOfflineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
         services.AddHostedService<Worker>();
     })
     .Build();

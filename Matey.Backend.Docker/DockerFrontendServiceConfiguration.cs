@@ -2,5 +2,5 @@
 {
     using Abstractions;
 
-    internal record DockerFrontendServiceConfiguration(string? Provider, string? Rule) : IFrontendServiceConfiguration;
+    internal record DockerFrontendServiceConfiguration(string? Rule) : IFrontendServiceConfiguration;
 }

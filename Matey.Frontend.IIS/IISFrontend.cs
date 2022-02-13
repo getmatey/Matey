@@ -28,7 +28,7 @@ namespace Matey.Frontend.IIS
 
         private string CreateWebsiteName(SiteIdentifier identifier)
         {
-            return $"{options.Value.SiteNamePrefix}{string.Join(options.Value.SiteNameDelimiter, identifier.Value)}";
+            return $"{options.Value.SiteNamePrefix}{identifier.ToString(options.Value.SiteNameDelimiter)}";
         }
 
         private string CreateWebsitePath(string websiteName) => Path.Combine(options.Value.WebsitesPath, websiteName);
@@ -47,15 +47,12 @@ namespace Matey.Frontend.IIS
                 {
                     Rewrite = new Rewrite()
                     {
-                        Rules = new List<RewriteRule>
+                        Rules = inboundProxy.Destinations.Select(d => new RewriteRule()
                         {
-                            new RewriteRule()
-                            {
-                                Name = "InboundReverseProxyRule",
-                                Match = new RewriteMatchRule { Url = "(.*)" },
-                                Action = new RewriteRuleAction { Type = "Rewrite", Url = $"http://{inboundProxy.Destination.IPEndPoint}/{{R:1}}" }
-                            }
-                        }
+                            Name = $"{d.Name}InboundReverseProxyRule",
+                            Match = new RewriteMatchRule { Url = "(.*)" },
+                            Action = new RewriteRuleAction { Type = "Rewrite", Url = $"http://{d.IPEndPoint}/{{R:1}}" }
+                        }).ToList()
                     }
                 }
             };
@@ -74,41 +71,14 @@ namespace Matey.Frontend.IIS
             logger.LogInformation("Added website '{0}'.", websiteName);
         }
 
-        public IEnumerable<ReverseProxySite> GetInboundProxies()
+        public IEnumerable<SiteIdentifier> GetSiteIdentifiers()
         {
-            IList<ReverseProxySite> inboundProxies = new List<ReverseProxySite>();
-            foreach(Administration.Site site in serverManager.Sites.Where(s => s.Name.StartsWith(options.Value.SiteNamePrefix)))
-            {
-                string identifierString = site.Name.Substring(options.Value.SiteNamePrefix.Length);
-                string websitePath = CreateWebsitePath(site.Name);
-                SiteIdentifier identifier = SiteIdentifier.Create(identifierString.Split(options.Value.SiteNameDelimiter));
-
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(WebConfiguration));
-                using (XmlReader reader = XmlReader.Create(CreateWebsiteConfigPath(websitePath)))
-                {
-                    WebConfiguration? configuration = (WebConfiguration?)xmlSerializer.Deserialize(reader);
-                    if(configuration is not null)
-                    {
-                        Administration.Binding binding = site.Bindings.First();
-                        RewriteRule? rule = configuration?.WebServer?.Rewrite?.Rules.FirstOrDefault();
-                        RewriteRuleAction? action = rule?.Action;
-
-                        if(action?.Url is not null)
-                        {
-                            Uri? uri = new Uri(action.Url);
-
-                            inboundProxies.Add(
-                                new ReverseProxySite(
-                                    identifier,
-                                    binding.Host,
-                                    binding.EndPoint.Port,
-                                    new ProxyForwardDestination(uri.Scheme, new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port))));
-                        }
-                    }
-                }
-            }
-
-            return inboundProxies;
+            return serverManager.Sites
+                .Where(s => s.Name.StartsWith(options.Value.SiteNamePrefix))
+                .Select(s => s.Name.Substring(options.Value.SiteNamePrefix.Length))
+                .Select(i => i.Split(options.Value.SiteNameDelimiter))
+                .Where(p => p.Length > 2)
+                .Select(p => new SiteIdentifier(Provider: p[0], Name: p[1], Id: p[2]));
         }
 
         public void RemoveSite(SiteIdentifier identifier)

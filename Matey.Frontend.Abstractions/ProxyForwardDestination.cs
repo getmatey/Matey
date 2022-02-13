@@ -2,5 +2,5 @@
 
 namespace Matey.Frontend.Abstractions
 {
-    public record ProxyForwardDestination(string Scheme, IPEndPoint IPEndPoint);
+    public record ProxyForwardDestination(string Name, string Scheme, IPEndPoint IPEndPoint);
 }

@@ -14,9 +14,9 @@
 
         object? GetValue(string key, Type type);
 
-        IAttributeSection GetSection(string key);
+        IAttributeSection? GetSection(string key);
 
-        string GetString(string key);
+        string? GetString(string key);
 
         bool TryGetString(string key, out string? value);
     }

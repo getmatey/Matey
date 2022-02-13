@@ -4,9 +4,16 @@
 
     internal static class DockerFrontendServiceConfigurationFactory
     {
-        internal static DockerFrontendServiceConfiguration Create(IAttributeSection attributes)
-            => new DockerFrontendServiceConfiguration(
-                Provider: attributes.TryGetString(Tokens.Provider, out string? provider) ? provider : null,
-                Rule: attributes.TryGetString(Tokens.Rule, out string? rule) ? rule : null);
+        internal static DockerFrontendServiceConfiguration Create(IAttributeSection? attributes)
+        {
+            string? rule = null;
+
+            if(attributes is not null)
+            {
+                attributes.TryGetString(Tokens.Rule, out rule);
+            }
+
+            return new DockerFrontendServiceConfiguration(Rule: rule);
+        }
     }
 }

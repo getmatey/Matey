@@ -2,7 +2,6 @@
 {
     public interface IFrontendServiceConfiguration
     {
-        string? Provider { get; }
         string? Rule { get; }
     }
 }

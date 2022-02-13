@@ -119,6 +119,7 @@ namespace Matey.Backend.Docker
             IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
             IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
                 attributes,
+                e.Actor.ID.Substring(0, 12),
                 e.Actor.Attributes["name"],
                 a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
             
@@ -128,12 +129,36 @@ namespace Matey.Backend.Docker
 
         private async Task OnContainerStopAsync(object? sender, Message e)
         {
+            string serviceId = e.ID.Substring(0, 12);
             string serviceName = e.Actor.Attributes["name"];
             IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
             await notifier.NotifyAsync(new ServiceOfflineNotification(
                 ProviderName,
-                serviceName,
-                attributes.Sections.Where(s => !Tokens.Reserved.Contains(s.Name)).Select(s => s.Name).ToImmutableArray()));
+                serviceId,
+                serviceName));
+        }
+
+        public IEnumerable<IServiceConfiguration> GetRunningServiceConfigurations()
+        {
+            IList<ContainerListResponse> containers = client.Containers
+                .ListContainersAsync(new ContainersListParameters() { All = true })
+                .GetAwaiter()
+                .GetResult();
+
+            foreach (ContainerListResponse container in containers.Where(c => c.State == "running" && c.Labels.Any(l => l.Key.StartsWith(GetLabelPrefix()))))
+            {
+                IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), container.Labels);
+                bool? isEnabled;
+                if (!attributes.TryGetValue<bool>(Tokens.Enabled, out isEnabled) || (isEnabled ?? true))
+                {
+                    EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
+                    yield return DockerServiceConfigurationFactory.Create(
+                        attributes,
+                        container.ID.Substring(0, 12), // Truncated container identifier
+                        container.Names.First().Replace("/", ""),
+                        a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
+                }
+            }
         }
     }
 }

@@ -4,6 +4,6 @@ namespace Matey.Backend.Abstractions
 {
     public record ServiceOfflineNotification(
         string Provider,
-        string ServiceName,
-        ImmutableArray<string> Backends) : IServiceNotification;
+        string ServiceId,
+        string ServiceName) : IServiceNotification;
 }

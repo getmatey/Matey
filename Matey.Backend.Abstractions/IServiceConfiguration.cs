@@ -4,10 +4,12 @@ namespace Matey.Backend.Abstractions
 {
     public interface IServiceConfiguration
     {
-        public string Name { get; }
-        public string Provider { get; }
-        public string Domain { get; }
-        public bool IsEnabled { get; }
-        public ImmutableArray<IBackendServiceConfiguration> Backends { get; }
+        string Id { get; }
+        string Name { get; }
+        string Provider { get; }
+        string? Target { get; }
+        string Domain { get; }
+        bool IsEnabled { get; }
+        ImmutableArray<IBackendServiceConfiguration> Backends { get; }
     }
 }

@@ -36,16 +36,16 @@ namespace Matey.Backend.Docker.Attributes
             }
         }
 
-        public IAttributeSection GetSection(string key)
+        public IAttributeSection? GetSection(string key)
         {
             if(key.Contains(Path.Delimiter))
             {
                 string root = Path.Root(key);
-                return subsections[root].GetSection(Path.Relative(root, key));
+                return GetSection(root)?.GetSection(Path.Relative(root, key));
             }
             else
             {
-                return subsections[key];
+                return subsections.TryGetValue(key, out IAttributeSection? section) ? section : null;
             }
         }
 
@@ -88,30 +88,32 @@ namespace Matey.Backend.Docker.Attributes
 
         public object? GetValue(string key, Type type)
         {
-            string source = GetString(key);
+            string? source = GetString(key);
             TypeConverter converter = TypeDescriptor.GetConverter(type);
-            return converter.ConvertFromString(source);
+            return source is null ? null : converter.ConvertFromString(source);
         }
 
-        public string GetString(string key)
+        public string? GetString(string key)
         {
             if (key.Contains(Path.Delimiter))
             {
                 string root = Path.Root(key);
-                return subsections[root].GetString(Path.Relative(root, key));
+                return GetSection(root)?.GetString(Path.Relative(root, key));
             }
             else
             {
-                return values[key];
+                return values.TryGetValue(key, out string? value) ? value : null;
             }
         }
 
         public bool TryGetString(string key, out string? value)
         {
+            value = null;
+
             if(key.Contains(Path.Delimiter))
             {
                 string root = Path.Root(key);
-                return subsections[root].TryGetString(Path.Relative(root, key), out value);
+                return GetSection(root)?.TryGetString(Path.Relative(root, key), out value) ?? false;
             }
             else
             {
