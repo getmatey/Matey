@@ -4,7 +4,9 @@
     {
         string Name { get; }
 
-        void AddReverseProxy(ReverseProxySite site);
+        void AddSite(ReverseProxySite site);
+
+        void UpdateSite(ReverseProxySite site);
 
         IEnumerable<SiteIdentifier> GetSiteIdentifiers();
 

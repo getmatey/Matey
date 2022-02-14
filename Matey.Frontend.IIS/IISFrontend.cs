@@ -35,19 +35,26 @@ namespace Matey.Frontend.IIS
 
         private string CreateWebsiteConfigPath(string websitePath) => Path.Combine(websitePath, "web.config");
 
-        public void AddReverseProxy(ReverseProxySite inboundProxy)
+        private void SetWebsiteConfiguration(string websitePath, WebConfiguration webConfiguration)
         {
-            string websiteName = CreateWebsiteName(inboundProxy.Identifier);
-            string websitePath = CreateWebsitePath(websiteName);
-            Directory.CreateDirectory(websitePath);
+            string configPath = CreateWebsiteConfigPath(websitePath);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(WebConfiguration));
+            using (XmlWriter writer = XmlWriter.Create(configPath, new XmlWriterSettings { Async = true }))
+            {
+                xmlSerializer.Serialize(writer, webConfiguration);
+                writer.Flush();
+            }
+        }
 
-            WebConfiguration webConfiguration = new WebConfiguration()
+        private WebConfiguration CreateWebConfiguration(ReverseProxySite site)
+        {
+            return new WebConfiguration()
             {
                 WebServer = new WebServer()
                 {
                     Rewrite = new Rewrite()
                     {
-                        Rules = inboundProxy.Destinations.Select(d => new RewriteRule()
+                        Rules = site.Destinations.Select(d => new RewriteRule()
                         {
                             Name = $"{d.Name}InboundReverseProxyRule",
                             Match = new RewriteMatchRule { Url = "(.*)" },
@@ -56,19 +63,31 @@ namespace Matey.Frontend.IIS
                     }
                 }
             };
+        }
 
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(WebConfiguration));
-            using (XmlWriter writer = XmlWriter.Create(CreateWebsiteConfigPath(websitePath), new XmlWriterSettings { Async = true }))
-            {
-                xmlSerializer.Serialize(writer, webConfiguration);
-                writer.Flush();
-            }
+        public void AddSite(ReverseProxySite site)
+        {
+            string websiteName = CreateWebsiteName(site.Identifier);
+            string websitePath = CreateWebsitePath(websiteName);
 
-            Administration.Site site = serverManager.Sites.Add(websiteName, "http", $"*:{inboundProxy.Port}:{inboundProxy.Domain}", websitePath);
-            site.ServerAutoStart = true;
+            Directory.CreateDirectory(websitePath);
+            SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
+
+            Administration.Site administration = serverManager.Sites.Add(websiteName, "http", $"*:{site.Port}:{site.Domain}", websitePath);
+            administration.ServerAutoStart = true;
             serverManager.CommitChanges();
 
             logger.LogInformation("Added website '{0}'.", websiteName);
+        }
+
+        public void UpdateSite(ReverseProxySite site)
+        {
+            string websiteName = CreateWebsiteName(site.Identifier);
+            string websitePath = CreateWebsitePath(websiteName);
+
+            SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
+
+            logger.LogInformation("Updated website '{0}'.", websiteName);
         }
 
         public IEnumerable<SiteIdentifier> GetSiteIdentifiers()

@@ -34,11 +34,15 @@
         {
             if (HostedSite is null && ReverseProxySpecification is not null)
             {
-                ReverseProxySpecification.Target.AddReverseProxy(ReverseProxySpecification.Configuration);
+                ReverseProxySpecification.Target.AddSite(ReverseProxySpecification.Configuration);
             }
             else if (HostedSite is not null && ReverseProxySpecification is null)
             {
                 HostedSite.Host.RemoveSite(HostedSite.Identifier);
+            }
+            else if (HostedSite is not null && ReverseProxySpecification is not null)
+            {
+                HostedSite.Host.UpdateSite(ReverseProxySpecification.Configuration);
             }
         }
     }

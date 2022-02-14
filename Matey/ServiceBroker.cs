@@ -59,7 +59,7 @@ namespace Matey
             IServiceConfiguration serviceConfiguration = notification.Configuration;
             IFrontend target = SelectedFrontend(serviceConfiguration);
 
-            target.AddReverseProxy(serviceConfiguration.CreateReverseProxySite());
+            target.AddSite(serviceConfiguration.CreateReverseProxySite());
             return Task.CompletedTask;
         }
 
