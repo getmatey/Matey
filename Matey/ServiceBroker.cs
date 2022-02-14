@@ -57,17 +57,10 @@ namespace Matey
         public Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
         {
             IServiceConfiguration serviceConfiguration = notification.Configuration;
-            SiteIdentifier identifier = serviceConfiguration.CreateSiteIdentifier();
-            AddReverseProxy(identifier, serviceConfiguration);
-
-            return Task.CompletedTask;
-        }
-
-        private void AddReverseProxy(SiteIdentifier identifier, IServiceConfiguration serviceConfiguration)
-        {
-            IFrontend target = SelectedFrontend(serviceConfiguration); ;
+            IFrontend target = SelectedFrontend(serviceConfiguration);
 
             target.AddReverseProxy(serviceConfiguration.CreateReverseProxySite());
+            return Task.CompletedTask;
         }
 
         public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
