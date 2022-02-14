@@ -7,5 +7,5 @@
 
         Task MediatR.INotificationHandler<TNotification>.Handle(TNotification notification, CancellationToken cancellationToken)
             => HandleAsync(notification, cancellationToken);
-}
+    }
 }

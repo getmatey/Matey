@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Matey.Frontend.Abstractions
+﻿namespace Matey.Frontend.Abstractions
 {
     public record SiteIdentifier(string Provider, string Name, string Id)
     {

@@ -4,7 +4,7 @@ namespace Matey.Common.Microsoft.DependencyInjection
 {
     public static class Extensions
     {
-        public static IServiceCollection AddNotificationHandler<TNotification, THandler>(this IServiceCollection services) 
+        public static IServiceCollection AddNotificationHandler<TNotification, THandler>(this IServiceCollection services)
             where THandler : class, INotificationHandler<TNotification>
             where TNotification : INotification
         {

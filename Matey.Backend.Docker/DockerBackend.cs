@@ -2,7 +2,6 @@
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Immutable;
 using System.Net;
 
 namespace Matey.Backend.Docker
@@ -79,7 +78,7 @@ namespace Matey.Backend.Docker
             }
 
             // Log uncaught task exceptions.
-            if(task is not null)
+            if (task is not null)
             {
                 task.ContinueWith(t =>
                 {
@@ -111,7 +110,7 @@ namespace Matey.Backend.Docker
             // Find the container which caused the start event.
             IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters });
             ContainerListResponse container = containers.First();
-            
+
             // TODO: Configurable network.
             EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
 
@@ -122,7 +121,7 @@ namespace Matey.Backend.Docker
                 e.Actor.ID.Substring(0, 12),
                 e.Actor.Attributes["name"],
                 a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
-            
+
             // Notify listeners that the service is online.
             await notifier.NotifyAsync(new ServiceOnlineNotification(configuration));
         }

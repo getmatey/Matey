@@ -19,17 +19,17 @@ namespace Matey.Backend.Docker.Attributes
             this.path = path;
             this.attributes = new Dictionary<string, string>(attributes.Where(p => p.Key.StartsWith(path)));
 
-            foreach(var attribute in this.attributes)
+            foreach (var attribute in this.attributes)
             {
                 // Child paths
                 string relative = Path.Child(path, attribute.Key);
                 string absolute = Path.Combine(path, relative);
-                
+
                 if (absolute == attribute.Key) // Value (leaf)
                 {
                     values.Add(relative, attribute.Value);
                 }
-                else if(!subsections.ContainsKey(relative)) // Section
+                else if (!subsections.ContainsKey(relative)) // Section
                 {
                     subsections.Add(relative, new AttributeSection(absolute, this.attributes));
                 }
@@ -38,7 +38,7 @@ namespace Matey.Backend.Docker.Attributes
 
         public IAttributeSection? GetSection(string key)
         {
-            if(key.Contains(Path.Delimiter))
+            if (key.Contains(Path.Delimiter))
             {
                 string root = Path.Root(key);
                 return GetSection(root)?.GetSection(Path.Relative(root, key));
@@ -52,7 +52,7 @@ namespace Matey.Backend.Docker.Attributes
         public bool TryGetValue<T>(string key, out T? value) where T : struct
         {
             object? valueObj = null;
-            if(TryGetValue(key, typeof(T), out valueObj))
+            if (TryGetValue(key, typeof(T), out valueObj))
             {
                 value = (T?)valueObj;
                 return true;
@@ -110,7 +110,7 @@ namespace Matey.Backend.Docker.Attributes
         {
             value = null;
 
-            if(key.Contains(Path.Delimiter))
+            if (key.Contains(Path.Delimiter))
             {
                 string root = Path.Root(key);
                 return GetSection(root)?.TryGetString(Path.Relative(root, key), out value) ?? false;

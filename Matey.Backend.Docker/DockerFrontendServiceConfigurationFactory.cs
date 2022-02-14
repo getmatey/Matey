@@ -8,7 +8,7 @@
         {
             string? rule = null;
 
-            if(attributes is not null)
+            if (attributes is not null)
             {
                 attributes.TryGetString(Tokens.Rule, out rule);
             }

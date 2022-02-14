@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace Matey
+﻿namespace Matey
 {
     using Backend.Abstractions;
     using Frontend.Abstractions;
@@ -36,15 +34,15 @@ namespace Matey
         public void Synchronize()
         {
             SitesSynchronizer synchronizer = new SitesSynchronizer();
-            foreach(IFrontend frontend in frontends.Values)
+            foreach (IFrontend frontend in frontends.Values)
             {
-                foreach(SiteIdentifier siteIdentifier in frontend.GetSiteIdentifiers())
+                foreach (SiteIdentifier siteIdentifier in frontend.GetSiteIdentifiers())
                 {
                     synchronizer.Add(new HostedSite(siteIdentifier, frontend));
                 }
             }
 
-            foreach(IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
+            foreach (IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
             {
                 synchronizer.Add(new ReverseProxySpecification(
                     serviceConfiguration.CreateReverseProxySite(),

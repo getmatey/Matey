@@ -8,7 +8,7 @@
 
         private SiteSynchronizer GetOrAdd(SiteIdentifier identifier)
         {
-            if(!synchronizers.TryGetValue(identifier, out SiteSynchronizer? link))
+            if (!synchronizers.TryGetValue(identifier, out SiteSynchronizer? link))
             {
                 link = new SiteSynchronizer();
                 synchronizers.Add(identifier, link);
@@ -31,7 +31,7 @@
 
         public void Synchronize()
         {
-            foreach(SiteSynchronizer synchronizer in synchronizers.Values)
+            foreach (SiteSynchronizer synchronizer in synchronizers.Values)
             {
                 synchronizer.Synchronize();
             }

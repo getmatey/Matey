@@ -23,7 +23,7 @@
         internal static string Child(string basePath, string path)
         {
             string relative = Relative(basePath, path);
-            if(relative.Contains(Delimiter))
+            if (relative.Contains(Delimiter))
             {
                 return Root(relative);
             }
@@ -35,7 +35,7 @@
 
         internal static string Root(string path)
         {
-            if(path.Contains(Delimiter))
+            if (path.Contains(Delimiter))
             {
                 return path.Substring(0, path.IndexOf(Delimiter));
             }

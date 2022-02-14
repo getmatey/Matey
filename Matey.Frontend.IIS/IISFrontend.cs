@@ -1,15 +1,14 @@
 ﻿
-using Microsoft.Extensions.Options;
-using Administration = Microsoft.Web.Administration;
-using System.Xml.Serialization;
-using System.Xml;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Xml;
+using System.Xml.Serialization;
+using Administration = Microsoft.Web.Administration;
 
 namespace Matey.Frontend.IIS
 {
     using Abstractions;
     using Configuration;
-    using System.Net;
 
     public class IISFrontend : IFrontend
     {

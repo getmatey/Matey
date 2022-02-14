@@ -5,10 +5,12 @@
         private HostedSite? hostedSite;
         private ReverseProxySpecification? reverseProxySpecification;
 
-        public HostedSite? HostedSite {
+        public HostedSite? HostedSite
+        {
             get => hostedSite;
-            set {
-                if(ReverseProxySpecification is not null)
+            set
+            {
+                if (ReverseProxySpecification is not null)
                 {
                     // TODO: Sanity checks
                 }
@@ -17,11 +19,12 @@
             }
         }
 
-        public ReverseProxySpecification? ReverseProxySpecification {
+        public ReverseProxySpecification? ReverseProxySpecification
+        {
             get => reverseProxySpecification;
             set
             {
-                if(HostedSite is not null)
+                if (HostedSite is not null)
                 {
                     // TODO: Sanity checks
                 }
