@@ -4,12 +4,10 @@
     {
         string Name { get; }
 
-        void AddSite(ReverseProxySite site);
+        void InitializeRequestRoutes(IEnumerable<RequestRouteRule> rules);
 
-        void UpdateSite(ReverseProxySite site);
+        void AddRequestRoute(RequestRouteRule rule);
 
-        IEnumerable<SiteIdentifier> GetSiteIdentifiers();
-
-        void RemoveSite(SiteIdentifier identifier);
+        void RemoveRequestRoutes(ApplicationRequestEndpoint endpoint);
     }
 }

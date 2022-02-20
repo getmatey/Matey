@@ -9,6 +9,7 @@ namespace Matey.Frontend.IIS
 {
     using Abstractions;
     using Configuration;
+    using Matey.Frontend.Abstractions.Rules;
 
     public class IISFrontend : IFrontend
     {
@@ -25,128 +26,119 @@ namespace Matey.Frontend.IIS
             this.logger = logger;
         }
 
-        private string CreateWebsiteName(SiteIdentifier identifier)
+        private string CreateWebFarmName(HostRequestRule hostRequestRule)
         {
-            return $"{identifier}{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
+            return $"{hostRequestRule.Host}{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
         }
 
-        private static string CreateRewriteRuleName(string websiteName) => $"ARR_{websiteName}_loadbalance";
-
-        private string CreateWebsitePath(string websiteName) => Path.Combine(options.Value.WebsitesPath, websiteName);
-
-        private string CreateWebsiteConfigPath(string websitePath) => Path.Combine(websitePath, "web.config");
-
-        private void SetWebsiteConfiguration(string websitePath, WebConfiguration webConfiguration)
+        private WebFarm AddRequestRouteWithoutCommit(
+            RequestRouteRule rule,
+            WebFarmCollection webFarms,
+            RulesCollection globalRules)
         {
-            string configPath = CreateWebsiteConfigPath(websitePath);
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(WebConfiguration));
-            using (XmlWriter writer = XmlWriter.Create(configPath, new XmlWriterSettings { Async = true }))
+            string webFarmName;
+
+            if (rule.Rule is HostRequestRule hostRule)
             {
-                xmlSerializer.Serialize(writer, webConfiguration);
-                writer.Flush();
+                webFarmName = CreateWebFarmName(hostRule);
+                WebFarm webFarm;
+                if (!webFarms.TryGet(webFarmName, out webFarm))
+                {
+                    webFarm = webFarms.CreateWebFarm();
+                    webFarm.Name = webFarmName;
+                    webFarms.Add(webFarm);
+
+                    Rule rewriteRule = globalRules.CreateRule();
+                    rewriteRule.Name = webFarm.RewriteRuleName;
+                    rewriteRule.StopProcessing = true;
+                    rewriteRule.Match.Url = "*";
+                    rewriteRule.Action.Type = "Rewrite";
+                    rewriteRule.Action.Url = $"http://{webFarmName}/{{R:0}}";
+                    globalRules.Add(rewriteRule);
+                }
+
+                WebFarmServer server = webFarm.CreateServer();
+                server.Address = rule.Endpoint.IPEndPoint.Address.ToString();
+                server.ApplicationRequestRouting.HttpPort = rule.Endpoint.IPEndPoint.Port;
+                webFarm.Add(server);
+
+                return webFarm;
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
         }
-
-        private WebConfiguration CreateWebConfiguration(ReverseProxySite site)
+    
+        public void AddRequestRoute(RequestRouteRule rule)
         {
-            return new WebConfiguration()
+            Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
+            RulesCollection globalRules = new RulesCollection(config
+                .GetSection("system.webServer/rewrite/globalRules")
+                .GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(config
+                .GetSection("webFarms")
+                .GetCollection(), globalRules);
+
+            WebFarm webFarm = AddRequestRouteWithoutCommit(rule, webFarms, globalRules);
+            serverManager.CommitChanges();
+            logger.LogInformation("Added load balancer '{0}'.", webFarm.Name);
+        }
+
+        public void InitializeRequestRoutes(IEnumerable<RequestRouteRule> rules)
+        {
+            Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
+            RulesCollection globalRules = new RulesCollection(config
+                .GetSection("system.webServer/rewrite/globalRules")
+                .GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(config
+                .GetSection("webFarms")
+                .GetCollection(), globalRules);
+
+            foreach (WebFarm webFarm in webFarms)
             {
-                WebServer = new WebServer()
+                if (webFarm.Name is not null && webFarm.Name.EndsWith($"{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}"))
                 {
-                    Rewrite = new Rewrite()
+                    webFarms.Remove(webFarm);
+                }
+            }
+
+            foreach (RequestRouteRule rule in rules)
+            {
+                AddRequestRouteWithoutCommit(rule, webFarms, globalRules);
+            }
+
+            serverManager.CommitChanges();
+        }
+
+        public void RemoveRequestRoutes(ApplicationRequestEndpoint endpoint)
+        {
+            Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
+            RulesCollection globalRules = new RulesCollection(config
+                .GetSection("system.webServer/rewrite/globalRules")
+                .GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(config
+                .GetSection("webFarms")
+                .GetCollection(), globalRules);
+
+            foreach (WebFarm webFarm in webFarms.ToList())
+            {
+                WebFarmServer? server = webFarm.FirstOrDefault(
+                    s => s.Address == endpoint.IPEndPoint.Address.ToString() && (s.ApplicationRequestRouting.HttpPort ?? 80) == endpoint.IPEndPoint.Port);
+                
+                if (server is not null)
+                {
+                    webFarm.Remove(server);
+
+                    if (webFarm.Count == 0)
                     {
-                        Rules = site.Destinations.Select(d => new RewriteRule()
-                        {
-                            Name = $"{d.Name}InboundReverseProxyRule",
-                            Match = new RewriteMatchRule { Url = "(.*)" },
-                            Action = new RewriteRuleAction { Type = "Rewrite", Url = $"http://{d.IPEndPoint}/{{R:1}}" }
-                        }).ToList()
+                        webFarms.Remove(webFarm);
+                        logger.LogInformation("Removed load balancer '{0}'.", webFarm.Name);
                     }
                 }
-            };
-        }
-
-        public void AddSite(ReverseProxySite site)
-        {
-            string websiteName = CreateWebsiteName(site.Identifier);
-            Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
-            Administration.ConfigurationElementCollection webFarmsCollection = config
-                .GetSection("webFarms")
-                .GetCollection();
-            Administration.ConfigurationElement webFarmElement = webFarmsCollection.CreateElement("webFarm");
-            webFarmElement["name"] = websiteName;
-
-            Administration.ConfigurationElementCollection webFarmCollection = webFarmElement.GetCollection();
-            foreach (ProxyForwardDestination destination in site.Destinations)
-            {
-                Administration.ConfigurationElement serverElement = webFarmCollection.CreateElement("server");
-                serverElement["address"] = destination.IPEndPoint.Address.ToString();
-                webFarmCollection.Add(serverElement);
             }
-            webFarmsCollection.Add(webFarmElement);
-
-            Administration.SectionGroup webServer = config.RootSectionGroup.SectionGroups.First(g => g.Name == "system.webServer");
-            Administration.ConfigurationElementCollection globalRulesCollection = config
-                .GetSection("system.webServer/rewrite/globalRules")
-                .GetCollection();
-            Administration.ConfigurationElement ruleElement = globalRulesCollection.CreateElement("rule");
-            ruleElement["name"] = CreateRewriteRuleName(websiteName);
-            ruleElement["patternSyntax"] = "Wildcard";
-            ruleElement["stopProcessing"] = "true";
-            
-            Administration.ConfigurationElement matchElement = ruleElement.GetChildElement("match");
-            matchElement["url"] = "*";
-
-            Administration.ConfigurationElement actionElement = ruleElement.GetChildElement("action");
-            actionElement["type"] = "Rewrite";
-            actionElement["url"] = $"http://{websiteName}/{{R:0}}";
-
-            globalRulesCollection.Add(ruleElement);
 
             serverManager.CommitChanges();
-
-            logger.LogInformation("Added load balancer '{0}'.", websiteName);
-        }
-
-        public void UpdateSite(ReverseProxySite site)
-        {
-            //string websiteName = CreateWebsiteName(site.Identifier);
-            //string websitePath = CreateWebsitePath(websiteName);
-
-            //SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
-
-            //logger.LogInformation("Updated website '{0}'.", websiteName);
-        }
-
-        public IEnumerable<SiteIdentifier> GetSiteIdentifiers()
-        {
-            string suffix = $"{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
-            return serverManager.GetApplicationHostConfiguration()
-                .GetSection("webFarms")
-                .GetCollection()
-                .Select(f => (string)f["name"])
-                .Where(n => n.EndsWith(suffix))
-                .Select(n => new SiteIdentifier(n.Substring(0, n.LastIndexOf(suffix))));
-        }
-
-        public void RemoveSite(SiteIdentifier identifier)
-        {
-            string websiteName = CreateWebsiteName(identifier);
-            string rewriteRuleName = CreateRewriteRuleName(websiteName);
-
-            Administration.ConfigurationElementCollection globalRulesCollection = serverManager.GetApplicationHostConfiguration()
-                .GetSection("system.webServer/rewrite/globalRules")
-                .GetCollection();
-            globalRulesCollection.Remove(globalRulesCollection.First(r => r["name"] as string == rewriteRuleName));
-
-            Administration.ConfigurationElementCollection webFarmsCollection = serverManager.GetApplicationHostConfiguration()
-                .GetSection("webFarms")
-                .GetCollection();
-            webFarmsCollection.Remove(webFarmsCollection.First(f => f["name"] as string == websiteName));
-
-            serverManager.CommitChanges();
-
-            logger.LogInformation("Removed load balancer '{0}'.", websiteName);
         }
     }
 }

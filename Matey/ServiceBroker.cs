@@ -2,21 +2,24 @@
 {
     using Backend.Abstractions;
     using Frontend.Abstractions;
-    using Synchronization;
+    using System.Net;
 
     public class ServiceBroker : IServiceBroker
     {
         private readonly IDictionary<string, IFrontend> frontends;
         private readonly IEnumerable<IBackend> backends;
+        private readonly IRequestRuleParser requestRuleParser;
         private readonly ILogger<ServiceBroker> logger;
 
         public ServiceBroker(
             IEnumerable<IFrontend> frontends,
             IEnumerable<IBackend> backends,
+            IRequestRuleParser requestRuleParser,
             ILogger<ServiceBroker> logger)
         {
             this.frontends = frontends.ToDictionary(f => f.Name);
             this.backends = backends;
+            this.requestRuleParser = requestRuleParser;
             this.logger = logger;
         }
 
@@ -33,41 +36,53 @@
 
         public void Synchronize()
         {
-            SitesSynchronizer synchronizer = new SitesSynchronizer();
-            foreach (IFrontend frontend in frontends.Values)
+            IDictionary<IFrontend, IList<RequestRouteRule>> initializations = new Dictionary<IFrontend, IList<RequestRouteRule>>();
+            foreach (IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
             {
-                foreach (SiteIdentifier siteIdentifier in frontend.GetSiteIdentifiers())
+                IFrontend frontend = SelectedFrontend(serviceConfiguration);
+                foreach (RequestRouteRule rule in serviceConfiguration.CreateRequestRouteRules(requestRuleParser))
                 {
-                    synchronizer.Add(new HostedSite(siteIdentifier, frontend));
+                    IList<RequestRouteRule>? routeRules;
+                    if(initializations.TryGetValue(frontend, out routeRules))
+                    {
+                        routeRules.Add(rule);
+                    }
+                    else
+                    {
+                        initializations[frontend] = new List<RequestRouteRule> { rule };
+                    }
                 }
             }
 
-            foreach (IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
+            foreach(KeyValuePair<IFrontend, IList<RequestRouteRule>> initialization in initializations)
             {
-                synchronizer.Add(new ReverseProxySpecification(
-                    serviceConfiguration.CreateReverseProxySite(),
-                    SelectedFrontend(serviceConfiguration)));
+                initialization.Key.InitializeRequestRoutes(initialization.Value);
             }
-
-            synchronizer.Synchronize();
         }
 
         public Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
         {
             IServiceConfiguration serviceConfiguration = notification.Configuration;
             IFrontend target = SelectedFrontend(serviceConfiguration);
+            IEnumerable<RequestRouteRule> rules = serviceConfiguration.CreateRequestRouteRules(requestRuleParser);
 
-            target.AddSite(serviceConfiguration.CreateReverseProxySite());
+            foreach (RequestRouteRule rule in rules)
+            {
+                target.AddRequestRoute(rule);
+            }
+
             return Task.CompletedTask;
         }
 
         public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
         {
-            SiteIdentifier identifier = new SiteIdentifier(notification.ServiceName);
+            IServiceConfiguration configuration = notification.Configuration;
 
-            // TODO: Read front-end
-            IFrontend frontend = DefaultFrontend();
-            frontend.RemoveSite(identifier);
+            IFrontend frontend = SelectedFrontend(configuration);
+            foreach (IBackendServiceConfiguration backend in configuration.Backends)
+            {
+                frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", new IPEndPoint(backend.IPAddress, backend.Port ?? 80)));
+            }
 
             return Task.CompletedTask;
         }

@@ -92,7 +92,7 @@ namespace Matey.Backend.Docker
             }
         }
 
-        private async Task OnContainerStartAsync(object? sender, Message e)
+        private async Task<IServiceConfiguration> CreateServiceConfigurationAsync(Message e)
         {
             // Filter by the container identifier
             IDictionary<string, IDictionary<string, bool>> filters = new Dictionary<string, IDictionary<string, bool>>
@@ -110,16 +110,21 @@ namespace Matey.Backend.Docker
             IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters });
             ContainerListResponse container = containers.First();
 
-            // TODO: Configurable network.
-            EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
-
             // Build a service configuration from the container attributes.
             IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
-            IServiceConfiguration configuration = DockerServiceConfigurationFactory.Create(
+            return DockerServiceConfigurationFactory.Create(
                 attributes,
-                e.Actor.ID.Substring(0, 12),
+                e.Actor.ID.Substring(0, 12), // Truncated container identifier
                 e.Actor.Attributes["name"],
-                a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
+                attr => DockerBackendServiceConfigurationFactory.Create(
+                    attr,
+                    container.NetworkSettings.Networks,
+                    attr => DockerFrontendServiceConfigurationFactory.Create(attr)));
+        }
+
+        private async Task OnContainerStartAsync(object? sender, Message e)
+        {
+            IServiceConfiguration configuration = await CreateServiceConfigurationAsync(e);
 
             // Notify listeners that the service is online.
             await notifier.NotifyAsync(new ServiceOnlineNotification(configuration));
@@ -127,13 +132,10 @@ namespace Matey.Backend.Docker
 
         private async Task OnContainerStopAsync(object? sender, Message e)
         {
-            string serviceId = e.ID.Substring(0, 12);
-            string serviceName = e.Actor.Attributes["name"];
-            IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
-            await notifier.NotifyAsync(new ServiceOfflineNotification(
-                ProviderName,
-                serviceId,
-                serviceName));
+            IServiceConfiguration configuration = await CreateServiceConfigurationAsync(e);
+
+            // Notify listeners that the service is offline.
+            await notifier.NotifyAsync(new ServiceOfflineNotification(configuration));
         }
 
         public IEnumerable<IServiceConfiguration> GetRunningServiceConfigurations()
@@ -149,12 +151,14 @@ namespace Matey.Backend.Docker
                 bool? isEnabled;
                 if (!attributes.TryGetValue<bool>(Tokens.Enabled, out isEnabled) || (isEnabled ?? true))
                 {
-                    EndpointSettings endpointSettings = container.NetworkSettings.Networks.First().Value;
                     yield return DockerServiceConfigurationFactory.Create(
                         attributes,
                         container.ID.Substring(0, 12), // Truncated container identifier
                         container.Names.First().Replace("/", ""),
-                        a => DockerBackendServiceConfigurationFactory.Create(a, IPAddress.Parse(endpointSettings.IPAddress)));
+                        attr => DockerBackendServiceConfigurationFactory.Create(
+                            attr,
+                            container.NetworkSettings.Networks,
+                            attr => DockerFrontendServiceConfigurationFactory.Create(attr)));
                 }
             }
         }
