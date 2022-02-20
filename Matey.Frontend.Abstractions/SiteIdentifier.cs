@@ -1,20 +1,15 @@
 ﻿namespace Matey.Frontend.Abstractions
 {
-    public record SiteIdentifier(string Provider, string Name, string Id)
+    public record SiteIdentifier(string Name)
     {
         public override int GetHashCode()
         {
-            return HashCode.Combine(Provider, Name, Id);
+            return Name.GetHashCode();
         }
 
         public override string ToString()
         {
-            return ToString(".");
-        }
-
-        public string ToString(string delimiter)
-        {
-            return $"{Provider}{delimiter}{Name}{delimiter}{Id}";
+            return Name;
         }
     }
 }

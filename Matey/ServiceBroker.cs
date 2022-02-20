@@ -63,7 +63,7 @@
 
         public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
         {
-            SiteIdentifier identifier = new SiteIdentifier(notification.Provider, notification.ServiceName, notification.ServiceId);
+            SiteIdentifier identifier = new SiteIdentifier(notification.ServiceName);
 
             // TODO: Read front-end
             IFrontend frontend = DefaultFrontend();

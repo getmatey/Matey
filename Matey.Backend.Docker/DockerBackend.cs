@@ -71,7 +71,6 @@ namespace Matey.Backend.Docker
                     task = OnContainerStartAsync(sender, e);
                     break;
 
-                case DockerEvent.Stop:
                 case DockerEvent.Die:
                     task = OnContainerStopAsync(sender, e);
                     break;

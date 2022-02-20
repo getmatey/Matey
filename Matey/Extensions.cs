@@ -8,7 +8,7 @@ namespace Matey
     {
         internal static SiteIdentifier CreateSiteIdentifier(this IServiceConfiguration serviceConfiguration)
         {
-            return new SiteIdentifier(serviceConfiguration.Provider, serviceConfiguration.Name, serviceConfiguration.Id);
+            return new SiteIdentifier(serviceConfiguration.Name);
         }
 
         internal static ReverseProxySite CreateReverseProxySite(this IServiceConfiguration serviceConfiguration)

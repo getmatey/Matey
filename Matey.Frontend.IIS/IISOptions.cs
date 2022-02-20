@@ -4,8 +4,8 @@
     {
         public string WebsitesPath { get; init; } = IISOptionsDefaults.WebsitesPath;
 
-        public string SiteNameDelimiter { get; init; } = IISOptionsDefaults.SiteNameDelimiter;
+        public string ServerFarmDelimiter { get; init; } = IISOptionsDefaults.ServerFarmDelimiter;
 
-        public string SiteNamePrefix { get; init; } = IISOptionsDefaults.SiteNamePrefix;
+        public string ServerFarmSuffix { get; init; } = IISOptionsDefaults.ServerFarmSuffix;
     }
 }

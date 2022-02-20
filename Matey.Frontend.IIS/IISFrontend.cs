@@ -27,8 +27,10 @@ namespace Matey.Frontend.IIS
 
         private string CreateWebsiteName(SiteIdentifier identifier)
         {
-            return $"{options.Value.SiteNamePrefix}{identifier.ToString(options.Value.SiteNameDelimiter)}";
+            return $"{identifier}{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
         }
+
+        private static string CreateRewriteRuleName(string websiteName) => $"ARR_{websiteName}_loadbalance";
 
         private string CreateWebsitePath(string websiteName) => Path.Combine(options.Value.WebsitesPath, websiteName);
 
@@ -67,49 +69,84 @@ namespace Matey.Frontend.IIS
         public void AddSite(ReverseProxySite site)
         {
             string websiteName = CreateWebsiteName(site.Identifier);
-            string websitePath = CreateWebsitePath(websiteName);
+            Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
+            Administration.ConfigurationElementCollection webFarmsCollection = config
+                .GetSection("webFarms")
+                .GetCollection();
+            Administration.ConfigurationElement webFarmElement = webFarmsCollection.CreateElement("webFarm");
+            webFarmElement["name"] = websiteName;
 
-            Directory.CreateDirectory(websitePath);
-            SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
+            Administration.ConfigurationElementCollection webFarmCollection = webFarmElement.GetCollection();
+            foreach (ProxyForwardDestination destination in site.Destinations)
+            {
+                Administration.ConfigurationElement serverElement = webFarmCollection.CreateElement("server");
+                serverElement["address"] = destination.IPEndPoint.Address.ToString();
+                webFarmCollection.Add(serverElement);
+            }
+            webFarmsCollection.Add(webFarmElement);
 
-            Administration.Site administration = serverManager.Sites.Add(websiteName, "http", $"*:{site.Port}:{site.Domain}", websitePath);
-            administration.ServerAutoStart = true;
+            Administration.SectionGroup webServer = config.RootSectionGroup.SectionGroups.First(g => g.Name == "system.webServer");
+            Administration.ConfigurationElementCollection globalRulesCollection = config
+                .GetSection("system.webServer/rewrite/globalRules")
+                .GetCollection();
+            Administration.ConfigurationElement ruleElement = globalRulesCollection.CreateElement("rule");
+            ruleElement["name"] = CreateRewriteRuleName(websiteName);
+            ruleElement["patternSyntax"] = "Wildcard";
+            ruleElement["stopProcessing"] = "true";
+            
+            Administration.ConfigurationElement matchElement = ruleElement.GetChildElement("match");
+            matchElement["url"] = "*";
+
+            Administration.ConfigurationElement actionElement = ruleElement.GetChildElement("action");
+            actionElement["type"] = "Rewrite";
+            actionElement["url"] = $"http://{websiteName}/{{R:0}}";
+
+            globalRulesCollection.Add(ruleElement);
+
             serverManager.CommitChanges();
 
-            logger.LogInformation("Added website '{0}'.", websiteName);
+            logger.LogInformation("Added load balancer '{0}'.", websiteName);
         }
 
         public void UpdateSite(ReverseProxySite site)
         {
-            string websiteName = CreateWebsiteName(site.Identifier);
-            string websitePath = CreateWebsitePath(websiteName);
+            //string websiteName = CreateWebsiteName(site.Identifier);
+            //string websitePath = CreateWebsitePath(websiteName);
 
-            SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
+            //SetWebsiteConfiguration(websitePath, CreateWebConfiguration(site));
 
-            logger.LogInformation("Updated website '{0}'.", websiteName);
+            //logger.LogInformation("Updated website '{0}'.", websiteName);
         }
 
         public IEnumerable<SiteIdentifier> GetSiteIdentifiers()
         {
-            return serverManager.Sites
-                .Where(s => s.Name.StartsWith(options.Value.SiteNamePrefix))
-                .Select(s => s.Name.Substring(options.Value.SiteNamePrefix.Length))
-                .Select(i => i.Split(options.Value.SiteNameDelimiter))
-                .Where(p => p.Length > 2)
-                .Select(p => new SiteIdentifier(Provider: p[0], Name: p[1], Id: p[2]));
+            string suffix = $"{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
+            return serverManager.GetApplicationHostConfiguration()
+                .GetSection("webFarms")
+                .GetCollection()
+                .Select(f => (string)f["name"])
+                .Where(n => n.EndsWith(suffix))
+                .Select(n => new SiteIdentifier(n.Substring(0, n.LastIndexOf(suffix))));
         }
 
         public void RemoveSite(SiteIdentifier identifier)
         {
             string websiteName = CreateWebsiteName(identifier);
-            string websitePath = CreateWebsitePath(websiteName);
-            Administration.Site site = serverManager.Sites[websiteName];
+            string rewriteRuleName = CreateRewriteRuleName(websiteName);
 
-            serverManager.Sites.Remove(site);
+            Administration.ConfigurationElementCollection globalRulesCollection = serverManager.GetApplicationHostConfiguration()
+                .GetSection("system.webServer/rewrite/globalRules")
+                .GetCollection();
+            globalRulesCollection.Remove(globalRulesCollection.First(r => r["name"] as string == rewriteRuleName));
+
+            Administration.ConfigurationElementCollection webFarmsCollection = serverManager.GetApplicationHostConfiguration()
+                .GetSection("webFarms")
+                .GetCollection();
+            webFarmsCollection.Remove(webFarmsCollection.First(f => f["name"] as string == websiteName));
+
             serverManager.CommitChanges();
-            Directory.Delete(websitePath, recursive: true);
 
-            logger.LogInformation("Removed website '{0}'.", websiteName);
+            logger.LogInformation("Removed load balancer '{0}'.", websiteName);
         }
     }
 }

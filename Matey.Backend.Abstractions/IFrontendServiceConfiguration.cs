@@ -1,7 +1,9 @@
-﻿namespace Matey.Backend.Abstractions
+﻿using Matey.Backend.Abstractions.Rules;
+
+namespace Matey.Backend.Abstractions
 {
     public interface IFrontendServiceConfiguration
     {
-        string? Rule { get; }
+        IFrontendRule Rule { get; }
     }
 }
