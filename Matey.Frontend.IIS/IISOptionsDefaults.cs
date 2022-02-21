@@ -2,7 +2,6 @@
 {
     internal static class IISOptionsDefaults
     {
-        internal const string WebsitesPath = "C:\\inetpub\\matey";
         internal const string ServerFarmDelimiter = ".";
         internal const string ServerFarmSuffix = "matey";
     }
