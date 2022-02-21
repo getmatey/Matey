@@ -28,7 +28,7 @@ namespace Matey.Frontend.IIS
 
         private string CreateWebFarmName(HostRequestRule hostRequestRule)
         {
-            return $"{hostRequestRule.Host}{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}";
+            return $"{hostRequestRule.Host}{options.Value.WebFarmDelimiter}{options.Value.WebFarmSuffix}";
         }
 
         private WebFarm AddRequestRouteWithoutCommit(
@@ -97,7 +97,7 @@ namespace Matey.Frontend.IIS
 
             foreach (WebFarm webFarm in webFarms)
             {
-                if (webFarm.Name is not null && webFarm.Name.EndsWith($"{options.Value.ServerFarmDelimiter}{options.Value.ServerFarmSuffix}"))
+                if (webFarm.Name is not null && webFarm.Name.EndsWith($"{options.Value.WebFarmDelimiter}{options.Value.WebFarmSuffix}"))
                 {
                     webFarms.Remove(webFarm);
                 }

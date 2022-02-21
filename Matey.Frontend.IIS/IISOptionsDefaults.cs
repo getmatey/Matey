@@ -2,7 +2,7 @@
 {
     internal static class IISOptionsDefaults
     {
-        internal const string ServerFarmDelimiter = ".";
-        internal const string ServerFarmSuffix = "matey";
+        internal const string WebFarmDelimiter = ".";
+        internal const string WebFarmSuffix = "matey";
     }
 }

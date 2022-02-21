@@ -2,8 +2,8 @@
 {
     public class IISOptions
     {
-        public string ServerFarmDelimiter { get; init; } = IISOptionsDefaults.ServerFarmDelimiter;
+        public string WebFarmDelimiter { get; init; } = IISOptionsDefaults.WebFarmDelimiter;
 
-        public string ServerFarmSuffix { get; init; } = IISOptionsDefaults.ServerFarmSuffix;
+        public string WebFarmSuffix { get; init; } = IISOptionsDefaults.WebFarmSuffix;
     }
 }
