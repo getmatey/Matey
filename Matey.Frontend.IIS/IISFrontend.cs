@@ -51,7 +51,7 @@ namespace Matey.Frontend.IIS
                     Rule rewriteRule = globalRules.CreateRule();
                     rewriteRule.Name = webFarm.RewriteRuleName;
                     rewriteRule.StopProcessing = true;
-                    rewriteRule.Match.Url = "*";
+                    rewriteRule.Match.Url = ".*";
                     rewriteRule.Action.Type = "Rewrite";
                     rewriteRule.Action.Url = $"http://{webFarmName}/{{R:0}}";
 
