@@ -54,6 +54,12 @@ namespace Matey.Frontend.IIS
                     rewriteRule.Match.Url = "*";
                     rewriteRule.Action.Type = "Rewrite";
                     rewriteRule.Action.Url = $"http://{webFarmName}/{{R:0}}";
+
+                    RuleCondition condition = rewriteRule.Conditions.CreateRuleCondition();
+                    condition.Input = "{HTTP_HOST}";
+                    condition.Pattern = hostRule.Host;
+                    rewriteRule.Conditions.Add(condition);
+
                     globalRules.Add(rewriteRule);
                 }
 

@@ -19,19 +19,22 @@ namespace Matey.Frontend.IIS.Configuration
 
         public bool StopProcessing
         {
-            get => bool.TryParse(element["stopProcessing"] as string, out var stopProcessing) ? stopProcessing : false;
-            set => element["stopProcessing"] = value.ToString().ToLower();
+            get => element["stopProcessing"] as bool? ?? false;
+            set => element["stopProcessing"] = value;
         }
 
         public RuleMatch Match { get; }
 
         public RuleAction Action { get; }
 
+        public RuleConditionCollection Conditions { get; }
+
         internal Rule(ConfigurationElement element)
         {
             this.element = element;
             Match = new RuleMatch(element.GetChildElement("match"));
             Action  = new RuleAction(element.GetChildElement("action"));
+            Conditions = new RuleConditionCollection(element.GetChildElement("conditions").GetCollection());
 
             if (this.element["patternSyntax"] is null)
             {
