@@ -92,6 +92,22 @@ namespace Matey.Backend.Docker
             }
         }
 
+        private DockerServiceConfiguration CreateServiceConfiguration(ContainerListResponse container)
+        {
+            // Build a service configuration from the container attributes.
+            IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), container.Labels);
+
+            return DockerServiceConfigurationFactory.Create(
+                attributes,
+                container.ID.Substring(0, 12), // Truncated container identifier
+                container.Names.First().Replace("/", ""),
+                attr => DockerBackendServiceConfigurationFactory.Create(
+                    attr,
+                    container.NetworkSettings.Networks,
+                    DockerFrontendServiceConfigurationFactory.Create,
+                    attr => DockerLoadBalancerConfigurationFactory.Create(attr, DockerLoadBalancerStickinesssConfigurationFactory.Create)));
+        }
+
         private async Task<IServiceConfiguration> CreateServiceConfigurationAsync(Message e)
         {
             // Filter by the container identifier
@@ -110,16 +126,7 @@ namespace Matey.Backend.Docker
             IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters { Filters = filters });
             ContainerListResponse container = containers.First();
 
-            // Build a service configuration from the container attributes.
-            IAttributeRoot attributes = new AttributeRoot(GetLabelPrefix(), e.Actor.Attributes);
-            return DockerServiceConfigurationFactory.Create(
-                attributes,
-                e.Actor.ID.Substring(0, 12), // Truncated container identifier
-                e.Actor.Attributes["name"],
-                attr => DockerBackendServiceConfigurationFactory.Create(
-                    attr,
-                    container.NetworkSettings.Networks,
-                    attr => DockerFrontendServiceConfigurationFactory.Create(attr)));
+            return CreateServiceConfiguration(container);
         }
 
         private async Task OnContainerStartAsync(object? sender, Message e)
@@ -151,14 +158,7 @@ namespace Matey.Backend.Docker
                 bool? isEnabled;
                 if (!attributes.TryGetValue<bool>(Tokens.Enabled, out isEnabled) || (isEnabled ?? true))
                 {
-                    yield return DockerServiceConfigurationFactory.Create(
-                        attributes,
-                        container.ID.Substring(0, 12), // Truncated container identifier
-                        container.Names.First().Replace("/", ""),
-                        attr => DockerBackendServiceConfigurationFactory.Create(
-                            attr,
-                            container.NetworkSettings.Networks,
-                            attr => DockerFrontendServiceConfigurationFactory.Create(attr)));
+                    yield return CreateServiceConfiguration(container);
                 }
             }
         }

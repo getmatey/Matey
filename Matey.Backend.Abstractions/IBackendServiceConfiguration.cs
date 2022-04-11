@@ -10,6 +10,10 @@ namespace Matey.Backend.Abstractions
 
         int? Port { get; }
 
+        int? Weight { get; }
+
         IFrontendServiceConfiguration Frontend { get; }
+
+        ILoadBalancerConfiguration LoadBalancer { get; }
     }
 }

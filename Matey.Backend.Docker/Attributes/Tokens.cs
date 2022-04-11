@@ -11,6 +11,8 @@ namespace Matey.Backend.Docker.Attributes
         internal const string Docker = "docker";
         internal const string Domain = "domain";
         internal const string Target = "target";
+        internal const string Weight = "weight";
+        internal const string LoadBalancer = "loadbalancer";
         internal static ImmutableHashSet<string> Reserved = (new string[] {
             Docker,
             Enabled,

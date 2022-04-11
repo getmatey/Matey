@@ -1,15 +1,13 @@
 ﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Xml;
-using System.Xml.Serialization;
 using Administration = Microsoft.Web.Administration;
 
 namespace Matey.Frontend.IIS
 {
     using Abstractions;
+    using Abstractions.Rules;
     using Configuration;
-    using Matey.Frontend.Abstractions.Rules;
 
     public class IISFrontend : IFrontend
     {
@@ -32,13 +30,13 @@ namespace Matey.Frontend.IIS
         }
 
         private WebFarm AddRequestRouteWithoutCommit(
-            RequestRouteRule rule,
+            RequestRoute route,
             WebFarmCollection webFarms,
             RulesCollection globalRules)
         {
             string webFarmName;
 
-            if (rule.Rule is HostRequestRule hostRule)
+            if (route.Rule is HostRequestRule hostRule)
             {
                 webFarmName = CreateWebFarmName(hostRule);
                 WebFarm webFarm;
@@ -64,8 +62,11 @@ namespace Matey.Frontend.IIS
                 }
 
                 WebFarmServer server = webFarm.CreateServer();
-                server.Address = rule.Endpoint.IPEndPoint.Address.ToString();
-                server.ApplicationRequestRouting.HttpPort = rule.Endpoint.IPEndPoint.Port;
+                server.Address = route.Endpoint.IPEndPoint.Address.ToString();
+                server.ApplicationRequestRouting.HttpPort = route.Endpoint.IPEndPoint.Port;
+                server.ApplicationRequestRouting.Weight = route.Endpoint.Weight;
+                server.ApplicationRequestRouting.Affinity.UseCookie = route.StickinessSettings.IsSticky;
+                server.ApplicationRequestRouting.Affinity.CookieName = route.StickinessSettings.CookieName;
                 webFarm.Add(server);
 
                 return webFarm;
@@ -76,30 +77,26 @@ namespace Matey.Frontend.IIS
             }
         }
     
-        public void AddRequestRoute(RequestRouteRule rule)
+        public void AddRequestRoute(RequestRoute route)
         {
             Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
-            RulesCollection globalRules = new RulesCollection(config
-                .GetSection("system.webServer/rewrite/globalRules")
-                .GetCollection());
-            WebFarmCollection webFarms = new WebFarmCollection(config
-                .GetSection("webFarms")
-                .GetCollection(), globalRules);
+            RulesCollection globalRules = new RulesCollection(
+                config.GetSection("system.webServer/rewrite/globalRules").GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(
+                config.GetSection("webFarms").GetCollection(), globalRules);
 
-            WebFarm webFarm = AddRequestRouteWithoutCommit(rule, webFarms, globalRules);
+            WebFarm webFarm = AddRequestRouteWithoutCommit(route, webFarms, globalRules);
             serverManager.CommitChanges();
             logger.LogInformation("Added load balancer '{0}'.", webFarm.Name);
         }
 
-        public void InitializeRequestRoutes(IEnumerable<RequestRouteRule> rules)
+        public void InitializeRequestRoutes(IEnumerable<RequestRoute> routes)
         {
             Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
-            RulesCollection globalRules = new RulesCollection(config
-                .GetSection("system.webServer/rewrite/globalRules")
-                .GetCollection());
-            WebFarmCollection webFarms = new WebFarmCollection(config
-                .GetSection("webFarms")
-                .GetCollection(), globalRules);
+            RulesCollection globalRules = new RulesCollection(
+                config.GetSection("system.webServer/rewrite/globalRules").GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(
+                config.GetSection("webFarms").GetCollection(), globalRules);
 
             foreach (WebFarm webFarm in webFarms)
             {
@@ -109,9 +106,9 @@ namespace Matey.Frontend.IIS
                 }
             }
 
-            foreach (RequestRouteRule rule in rules)
+            foreach (RequestRoute route in routes)
             {
-                AddRequestRouteWithoutCommit(rule, webFarms, globalRules);
+                AddRequestRouteWithoutCommit(route, webFarms, globalRules);
             }
 
             serverManager.CommitChanges();
@@ -120,12 +117,10 @@ namespace Matey.Frontend.IIS
         public void RemoveRequestRoutes(ApplicationRequestEndpoint endpoint)
         {
             Administration.Configuration config = serverManager.GetApplicationHostConfiguration();
-            RulesCollection globalRules = new RulesCollection(config
-                .GetSection("system.webServer/rewrite/globalRules")
-                .GetCollection());
-            WebFarmCollection webFarms = new WebFarmCollection(config
-                .GetSection("webFarms")
-                .GetCollection(), globalRules);
+            RulesCollection globalRules = new RulesCollection(
+                config.GetSection("system.webServer/rewrite/globalRules").GetCollection());
+            WebFarmCollection webFarms = new WebFarmCollection(
+                config.GetSection("webFarms").GetCollection(), globalRules);
 
             foreach (WebFarm webFarm in webFarms.ToList())
             {

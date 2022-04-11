@@ -6,7 +6,9 @@ namespace Matey.Backend.Docker
 
     public record DockerBackendServiceConfiguration(
         string Name,
-        IFrontendServiceConfiguration Frontend,
         IPAddress IPAddress,
-        int? Port) : IBackendServiceConfiguration;
+        int? Port,
+        int? Weight,
+        IFrontendServiceConfiguration Frontend,
+        ILoadBalancerConfiguration LoadBalancer) : IBackendServiceConfiguration;
 }

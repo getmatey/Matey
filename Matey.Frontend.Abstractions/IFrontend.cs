@@ -4,9 +4,9 @@
     {
         string Name { get; }
 
-        void InitializeRequestRoutes(IEnumerable<RequestRouteRule> rules);
+        void InitializeRequestRoutes(IEnumerable<RequestRoute> routes);
 
-        void AddRequestRoute(RequestRouteRule rule);
+        void AddRequestRoute(RequestRoute route);
 
         void RemoveRequestRoutes(ApplicationRequestEndpoint endpoint);
     }

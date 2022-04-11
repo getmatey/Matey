@@ -36,25 +36,25 @@
 
         public void Synchronize()
         {
-            IDictionary<IFrontend, IList<RequestRouteRule>> initializations = new Dictionary<IFrontend, IList<RequestRouteRule>>();
+            IDictionary<IFrontend, IList<RequestRoute>> initializations = new Dictionary<IFrontend, IList<RequestRoute>>();
             foreach (IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
             {
                 IFrontend frontend = SelectedFrontend(serviceConfiguration);
-                foreach (RequestRouteRule rule in serviceConfiguration.CreateRequestRouteRules(requestRuleParser))
+                foreach (RequestRoute rule in serviceConfiguration.ToRequestRoutes(requestRuleParser))
                 {
-                    IList<RequestRouteRule>? routeRules;
+                    IList<RequestRoute>? routeRules;
                     if(initializations.TryGetValue(frontend, out routeRules))
                     {
                         routeRules.Add(rule);
                     }
                     else
                     {
-                        initializations[frontend] = new List<RequestRouteRule> { rule };
+                        initializations[frontend] = new List<RequestRoute> { rule };
                     }
                 }
             }
 
-            foreach(KeyValuePair<IFrontend, IList<RequestRouteRule>> initialization in initializations)
+            foreach(KeyValuePair<IFrontend, IList<RequestRoute>> initialization in initializations)
             {
                 initialization.Key.InitializeRequestRoutes(initialization.Value);
             }
@@ -64,11 +64,11 @@
         {
             IServiceConfiguration serviceConfiguration = notification.Configuration;
             IFrontend target = SelectedFrontend(serviceConfiguration);
-            IEnumerable<RequestRouteRule> rules = serviceConfiguration.CreateRequestRouteRules(requestRuleParser);
+            IEnumerable<RequestRoute> routes = serviceConfiguration.ToRequestRoutes(requestRuleParser);
 
-            foreach (RequestRouteRule rule in rules)
+            foreach (RequestRoute route in routes)
             {
-                target.AddRequestRoute(rule);
+                target.AddRequestRoute(route);
             }
 
             return Task.CompletedTask;
@@ -81,7 +81,7 @@
             IFrontend frontend = SelectedFrontend(configuration);
             foreach (IBackendServiceConfiguration backend in configuration.Backends)
             {
-                frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", new IPEndPoint(backend.IPAddress, backend.Port ?? 80)));
+                frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", new IPEndPoint(backend.IPAddress, backend.Port ?? 80), backend.Weight));
             }
 
             return Task.CompletedTask;
