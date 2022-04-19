@@ -1,10 +1,5 @@
 ﻿using Matey.Backend.Abstractions;
 using Matey.Backend.Docker.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Matey.Backend.Docker
 {
@@ -14,6 +9,6 @@ namespace Matey.Backend.Docker
             IAttributeSection? attributes,
             Func<IAttributeSection?, ILoadBalancerStickinessConfiguration> stickinessConfigurationFactory)
         => new DockerLoadBalancerConfiguration(
-            stickinessConfigurationFactory(attributes));
+            stickinessConfigurationFactory(attributes?.GetSection("stickiness")));
     }
 }
