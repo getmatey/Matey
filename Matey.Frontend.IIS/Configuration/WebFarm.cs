@@ -26,6 +26,8 @@ namespace Matey.Frontend.IIS.Configuration
             get => servers.Count;
         }
 
+        public WebFarmApplicationRequestRouting ApplicationRequestRouting { get; }
+
         // Following the pattern used in IIS, rules will be automatically removed when the web farm is removed.
         public string RewriteRuleName => $"ARR_{Name}_loadbalance";
 
@@ -33,6 +35,8 @@ namespace Matey.Frontend.IIS.Configuration
         {
             this.element = element;
             enumerable = servers.Select(e => new WebFarmServer(e));
+            ApplicationRequestRouting = new WebFarmApplicationRequestRouting(
+                element.GetChildElement("applicationRequestRouting"));
         }
 
         private void CreateEnumerable()

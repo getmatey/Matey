@@ -12,12 +12,12 @@ namespace Matey.Frontend.IIS.Configuration
             set => element["address"] = value;
         }
 
-        public ApplicationRequestRouting ApplicationRequestRouting { get; }
+        public WebFarmServerApplicationRequestRouting ApplicationRequestRouting { get; }
 
         public WebFarmServer(ConfigurationElement element)
         {
             this.element = element;
-            ApplicationRequestRouting = new ApplicationRequestRouting(
+            ApplicationRequestRouting = new WebFarmServerApplicationRequestRouting(
                 element.GetChildElement("applicationRequestRouting"));
         }
     }

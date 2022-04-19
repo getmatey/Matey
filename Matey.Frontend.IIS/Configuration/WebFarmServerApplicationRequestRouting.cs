@@ -2,7 +2,7 @@
 
 namespace Matey.Frontend.IIS.Configuration
 {
-    internal class ApplicationRequestRouting
+    internal class WebFarmServerApplicationRequestRouting
     {
         private readonly ConfigurationElement element;
 
@@ -18,12 +18,9 @@ namespace Matey.Frontend.IIS.Configuration
             set => element["weight"] = value;
         }
 
-        public ApplicationRequestRoutingAffinity Affinity { get; }
-
-        public ApplicationRequestRouting(ConfigurationElement element)
+        public WebFarmServerApplicationRequestRouting(ConfigurationElement element)
         {
             this.element = element;
-            Affinity = new ApplicationRequestRoutingAffinity(element.GetChildElement("affinity"));
         }
     }
 }

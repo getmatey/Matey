@@ -61,12 +61,13 @@ namespace Matey.Frontend.IIS
                     globalRules.Add(rewriteRule);
                 }
 
+                webFarm.ApplicationRequestRouting.Affinity.UseCookie = route.StickinessSettings.IsSticky;
+                webFarm.ApplicationRequestRouting.Affinity.CookieName = route.StickinessSettings.CookieName;
+
                 WebFarmServer server = webFarm.CreateServer();
                 server.Address = route.Endpoint.IPEndPoint.Address.ToString();
                 server.ApplicationRequestRouting.HttpPort = route.Endpoint.IPEndPoint.Port;
-                server.ApplicationRequestRouting.Weight = route.Endpoint.Weight;
-                server.ApplicationRequestRouting.Affinity.UseCookie = route.StickinessSettings.IsSticky;
-                server.ApplicationRequestRouting.Affinity.CookieName = route.StickinessSettings.CookieName;
+                server.ApplicationRequestRouting.Weight = route.Endpoint.Weight ?? 100;
                 webFarm.Add(server);
 
                 return webFarm;
@@ -98,7 +99,7 @@ namespace Matey.Frontend.IIS
             WebFarmCollection webFarms = new WebFarmCollection(
                 config.GetSection("webFarms").GetCollection(), globalRules);
 
-            foreach (WebFarm webFarm in webFarms)
+            foreach (WebFarm webFarm in webFarms.ToList())
             {
                 if (webFarm.Name is not null && webFarm.Name.EndsWith($"{options.Value.WebFarmDelimiter}{options.Value.WebFarmSuffix}"))
                 {
