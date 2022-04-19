@@ -56,7 +56,14 @@
 
             foreach(KeyValuePair<IFrontend, IList<RequestRoute>> initialization in initializations)
             {
-                initialization.Key.InitializeRequestRoutes(initialization.Value);
+                try
+                {
+                    initialization.Key.InitializeRequestRoutes(initialization.Value);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to initialize front-end '{0}'.", initialization.Key.Name);
+                }
             }
         }
 
@@ -68,7 +75,15 @@
 
             foreach (RequestRoute route in routes)
             {
-                target.AddRequestRoute(route);
+                try
+                {
+                    target.AddRequestRoute(route);
+
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to add route {0} -> {1}.", route.Rule, route.Endpoint);
+                }
             }
 
             return Task.CompletedTask;
@@ -81,7 +96,18 @@
             IFrontend frontend = SelectedFrontend(configuration);
             foreach (IBackendServiceConfiguration backend in configuration.Backends)
             {
-                frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", new IPEndPoint(backend.IPAddress, backend.Port ?? 80), backend.Weight));
+                IPEndPoint ipEndPoint = new IPEndPoint(backend.IPAddress, backend.Port ?? 80);
+
+                try
+                {
+                    frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", ipEndPoint, backend.Weight));
+
+                    logger.LogInformation("Removed route {0} -> {1}.", configuration.Domain, ipEndPoint);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to remove route to {1}.", ipEndPoint);
+                }
             }
 
             return Task.CompletedTask;

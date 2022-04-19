@@ -13,15 +13,13 @@ namespace Matey.Frontend.IIS
     {
         private readonly IOptions<IISOptions> options;
         private readonly Administration.ServerManager serverManager;
-        private readonly ILogger<IISFrontend> logger;
 
         public string Name => "IIS";
 
-        public IISFrontend(IOptions<IISOptions> options, Administration.ServerManager serverManager, ILogger<IISFrontend> logger)
+        public IISFrontend(IOptions<IISOptions> options, Administration.ServerManager serverManager)
         {
             this.options = options;
             this.serverManager = serverManager;
-            this.logger = logger;
         }
 
         private string CreateWebFarmName(HostRequestRule hostRequestRule)
@@ -88,7 +86,6 @@ namespace Matey.Frontend.IIS
 
             WebFarm webFarm = AddRequestRouteWithoutCommit(route, webFarms, globalRules);
             serverManager.CommitChanges();
-            logger.LogInformation("Added load balancer '{0}'.", webFarm.Name);
         }
 
         public void InitializeRequestRoutes(IEnumerable<RequestRoute> routes)
@@ -135,7 +132,6 @@ namespace Matey.Frontend.IIS
                     if (webFarm.Count == 0)
                     {
                         webFarms.Remove(webFarm);
-                        logger.LogInformation("Removed load balancer '{0}'.", webFarm.Name);
                     }
                 }
             }
