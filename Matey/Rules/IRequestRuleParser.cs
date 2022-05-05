@@ -1,4 +1,4 @@
-﻿namespace Matey
+﻿namespace Matey.Rules
 {
     using Frontend.Abstractions.Rules;
 
