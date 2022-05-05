@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="5f8aac84-f328-406a-93ea-347760aeeca0" Name="Matey" Language="1033" Version="1.0.0.0" Manufacturer="The Matey Crew" UpgradeCode="30b808de-7b03-4f8b-89a9-30a4b90bce00">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="Matey" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Matey">
+					<Directory Id="REFFOLDER" Name="ref" />
+					<Directory Id="RUNTIMESFOLDER" Name="runtimes">
+						<Directory Id="UNIXFOLDER" Name="unix">
+							<Directory Id="UNIXLIBFOLDER" Name="lib">
+								<Directory Id="UNIXNETSTANDARD1.5FOLDER" Name="netstandard1.5" />
+							</Directory>
+						</Directory>
+					
+						<Directory Id="WINFOLDER" Name="win">
+							<Directory Id="WINLIBFOLDER" Name="lib">
+								<Directory Id="WINNET6.0FOLDER" Name="net6.0" />
+								<Directory Id="WINNETSTANDARD1.5FOLDER" Name="netstandard1.5" />
+							</Directory>
+						</Directory>
+					</Directory>
+				</Directory>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents">
+			<Component Id="ProductComponent" Directory="INSTALLFOLDER" Guid="4d242b5e-0d4f-476d-953b-405e357c6ccd"> 
+				<File 
+				  Id="MateyEXE" 
+				  Name="Matey.exe" 
+				  DiskId="1"
+				  Source="$(var.Matey.TargetPath)" 
+				  Vital="yes" 
+				  KeyPath="yes" />
+				
+				<ServiceInstall 
+				  Id="ServiceInstaller"
+				  Type="ownProcess"
+				  Vital="yes"
+				  Name="MateyConfiguratorService"
+				  DisplayName="Matey Configurator Service"
+				  Description="Matey Reverse Proxy and Load Balancer Configurator"
+				  Start="auto"
+				  Account="LocalSystem"
+				  ErrorControl="normal"
+				  Arguments=" /start MateyConfiguratorService" 
+				  Interactive="no" />
+        
+				<ServiceControl
+				  Id="StartService"
+				  Stop="both"
+				  Start="install"
+				  Remove="uninstall"
+				  Name="MateyConfiguratorService"
+				  Wait="yes" />
+			</Component>
+		
+			<Component Id="ProductDependenciesComponent" Guid="17a8da79-7d37-4370-a4d4-25918f102b85" Directory="INSTALLFOLDER">
+				<File Id="Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.dll" />
+				<File Id="Matey.Backend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Backend.Abstractions.dll" />
+				<File Id="Matey.Common.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.dll" />
+				<File Id="Matey.Common.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.Microsoft.DependencyInjection.dll" />
+				<File Id="Matey.Frontend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Abstractions.dll" />
+				<File Id="Matey.Frontend.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Microsoft.DependencyInjection.dll" />
+				<File Id="Docker.DotNet.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Docker.DotNet.dll" />
+				<File Id="MediatR.Contracts.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.Contracts.dll" />
+				<File Id="MediatR.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.dll" />
+				<File Id="MediatR.Extensions.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.Extensions.Microsoft.DependencyInjection.dll" />
+				<File Id="Microsoft.Extensions.Configuration.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.Abstractions.dll" />
+				<File Id="Microsoft.Extensions.Configuration.Binder.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.Binder.dll" />
+				<File Id="Microsoft.Extensions.Configuration.CommandLine.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.CommandLine.dll" />
+				<File Id="Microsoft.Extensions.Configuration.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.dll" />
+				<File Id="Microsoft.Extensions.Configuration.EnvironmentVariables.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.EnvironmentVariables.dll" />
+				<File Id="Microsoft.Extensions.Configuration.FileExtensions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.FileExtensions.dll" />
+				<File Id="Microsoft.Extensions.Configuration.Json.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.Json.dll" />
+				<File Id="Microsoft.Extensions.Configuration.UserSecrets.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Configuration.UserSecrets.dll" />
+				<File Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+				<File Id="Microsoft.Extensions.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.DependencyInjection.dll" />
+				<File Id="Microsoft.Extensions.FileProviders.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.FileProviders.Abstractions.dll" />
+				<File Id="Microsoft.Extensions.FileProviders.Physical.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.FileProviders.Physical.dll" />
+				<File Id="Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.FileSystemGlobbing.dll" />
+				<File Id="Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Hosting.Abstractions.dll" />
+				<File Id="Microsoft.Extensions.Hosting.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Hosting.dll" />
+				<File Id="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Abstractions.dll" />
+				<File Id="Microsoft.Extensions.Logging.Configuration.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Configuration.dll" />
+				<File Id="Microsoft.Extensions.Logging.Console.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Console.dll" />
+				<File Id="Microsoft.Extensions.Logging.Debug.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Debug.dll" />
+				<File Id="Microsoft.Extensions.Logging.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.dll" />
+				<File Id="Microsoft.Extensions.Logging.EventLog.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.EventLog.dll" />
+				<File Id="Microsoft.Extensions.Logging.EventSource.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.EventSource.dll" />
+				<File Id="Microsoft.Extensions.Options.ConfigurationExtensions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
+				<File Id="Microsoft.Extensions.Options.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Options.dll" />
+				<File Id="Microsoft.Extensions.Primitives.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Primitives.dll" />
+				<File Id="Microsoft.Web.Administration.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Web.Administration.dll" />
+				<File Id="Newtonsoft.Json.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Newtonsoft.Json.dll" />
+				<File Id="System.Diagnostics.EventLog.dll" KeyPath="no" Source="$(var.Matey.TargetDir)System.Diagnostics.EventLog.dll" />
+			</Component>
+
+			<Component Id="ProductConfigurationComponent" Directory="INSTALLFOLDER" Guid="7adbeb16-5195-4e36-91c4-87bc3935a861">
+				<File Id="appsettings.json" KeyPath="yes" Source="$(var.Matey.TargetDir)appsettings.json" />
+			</Component>
+			
+			<Component Id="ProductRefComponent" Directory="REFFOLDER" Guid="41c246e8-bc83-4cab-ab90-e1ce5cfcdd4c">
+				<File Id="ref_Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)ref\Matey.dll" />
+			</Component>
+						
+			<Component Id="ProductUnixNetStandard1.5Component" Directory="UNIXNETSTANDARD1.5FOLDER" Guid="ec5f081e-28ec-4bac-b907-e65de1570584">
+				<File Id="unix_netstandard1.5_System.ServiceProcess.ServiceController.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\unix\lib\netstandard1.5\System.ServiceProcess.ServiceController.dll" />
+			</Component>
+		
+			<Component Id="ProductWinNet6.0Component" Directory="WINNET6.0FOLDER" Guid="1d3fb49d-9afe-412e-87c2-556c6c870d6f">
+				<File Id="win_net6.0_System.Diagnostics.EventLog.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll" />
+				<File Id="win_net6.0_System.Diagnostics.EventLog.Messages.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll" />
+			</Component>
+		
+			<Component Id="ProductWinNetStandard1.5Component" Directory="WINNETSTANDARD1.5FOLDER" Guid="f8770494-2930-4db9-84cd-884fa26127fa">
+				<File Id="win_netstandard1.5_System.ServiceProcess.ServiceController.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\netstandard1.5\System.ServiceProcess.ServiceController.dll" />
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
