@@ -42,7 +42,7 @@
 				  Id="MateyEXE" 
 				  Name="Matey.exe" 
 				  DiskId="1"
-				  Source="$(var.Matey.TargetPath)" 
+				  Source="$(var.Matey.TargetDir)Matey.exe" 
 				  Vital="yes" 
 				  KeyPath="yes" />
 				
@@ -52,11 +52,10 @@
 				  Vital="yes"
 				  Name="MateyConfiguratorService"
 				  DisplayName="Matey Configurator Service"
-				  Description="Matey Reverse Proxy and Load Balancer Configurator"
+				  Description="Matey reverse proxy and load balancer configurator."
 				  Start="auto"
 				  Account="LocalSystem"
 				  ErrorControl="normal"
-				  Arguments=" /start MateyConfiguratorService" 
 				  Interactive="no" />
         
 				<ServiceControl
@@ -69,11 +68,15 @@
 			</Component>
 		
 			<Component Id="ProductDependenciesComponent" Guid="17a8da79-7d37-4370-a4d4-25918f102b85" Directory="INSTALLFOLDER">
+				<File Id="Matey.deps.json" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.deps.json" />
+				<File Id="Matey.runtimeconfig.json" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.runtimeconfig.json" />
 				<File Id="Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.dll" />
 				<File Id="Matey.Backend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Backend.Abstractions.dll" />
+				<File Id="Matey.Backend.Docker.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Backend.Docker.dll" />
 				<File Id="Matey.Common.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.dll" />
 				<File Id="Matey.Common.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.Microsoft.DependencyInjection.dll" />
 				<File Id="Matey.Frontend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Abstractions.dll" />
+				<File Id="Matey.Frontend.IIS.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.IIS.dll" />
 				<File Id="Matey.Frontend.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Microsoft.DependencyInjection.dll" />
 				<File Id="Docker.DotNet.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Docker.DotNet.dll" />
 				<File Id="MediatR.Contracts.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.Contracts.dll" />
