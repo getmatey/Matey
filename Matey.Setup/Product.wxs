@@ -97,6 +97,7 @@
 				<File Id="Microsoft.Extensions.FileSystemGlobbing.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.FileSystemGlobbing.dll" />
 				<File Id="Microsoft.Extensions.Hosting.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Hosting.Abstractions.dll" />
 				<File Id="Microsoft.Extensions.Hosting.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Hosting.dll" />
+				<File Id="Microsoft.Extensions.Hosting.WindowsServices.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Hosting.WindowsServices.dll" />
 				<File Id="Microsoft.Extensions.Logging.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Abstractions.dll" />
 				<File Id="Microsoft.Extensions.Logging.Configuration.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Configuration.dll" />
 				<File Id="Microsoft.Extensions.Logging.Console.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Microsoft.Extensions.Logging.Console.dll" />
@@ -119,18 +120,11 @@
 			<Component Id="ProductRefComponent" Directory="REFFOLDER" Guid="41c246e8-bc83-4cab-ab90-e1ce5cfcdd4c">
 				<File Id="ref_Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)ref\Matey.dll" />
 			</Component>
-						
-			<Component Id="ProductUnixNetStandard1.5Component" Directory="UNIXNETSTANDARD1.5FOLDER" Guid="ec5f081e-28ec-4bac-b907-e65de1570584">
-				<File Id="unix_netstandard1.5_System.ServiceProcess.ServiceController.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\unix\lib\netstandard1.5\System.ServiceProcess.ServiceController.dll" />
-			</Component>
 		
 			<Component Id="ProductWinNet6.0Component" Directory="WINNET6.0FOLDER" Guid="1d3fb49d-9afe-412e-87c2-556c6c870d6f">
 				<File Id="win_net6.0_System.Diagnostics.EventLog.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll" />
 				<File Id="win_net6.0_System.Diagnostics.EventLog.Messages.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll" />
-			</Component>
-		
-			<Component Id="ProductWinNetStandard1.5Component" Directory="WINNETSTANDARD1.5FOLDER" Guid="f8770494-2930-4db9-84cd-884fa26127fa">
-				<File Id="win_netstandard1.5_System.ServiceProcess.ServiceController.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\netstandard1.5\System.ServiceProcess.ServiceController.dll" />
+				<File Id="win_net6.0_System.ServiceProcess.ServiceController.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.ServiceProcess.ServiceController.dll" />
 			</Component>
 		</ComponentGroup>
 	</Fragment>

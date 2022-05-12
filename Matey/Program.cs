@@ -22,6 +22,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddNotificationHandler<ServiceOfflineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
         services.AddHostedService<Worker>();
     })
+    .UseWindowsService(c => c.ServiceName = "Matey Configurator Service")
     .Build();
 
 await host.RunAsync();
