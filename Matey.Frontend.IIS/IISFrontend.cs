@@ -84,7 +84,7 @@ namespace Matey.Frontend.IIS
             WebFarmCollection webFarms = new WebFarmCollection(
                 config.GetSection("webFarms").GetCollection(), globalRules);
 
-            WebFarm webFarm = AddRequestRouteWithoutCommit(route, webFarms, globalRules);
+            AddRequestRouteWithoutCommit(route, webFarms, globalRules);
             serverManager.CommitChanges();
         }
 

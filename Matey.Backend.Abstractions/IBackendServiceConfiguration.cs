@@ -6,6 +6,8 @@ namespace Matey.Backend.Abstractions
     {
         string Name { get; }
 
+        string? Protocol { get; }
+
         IPAddress IPAddress { get; }
 
         int? Port { get; }

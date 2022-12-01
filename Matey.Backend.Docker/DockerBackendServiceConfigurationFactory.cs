@@ -15,6 +15,7 @@ namespace Matey.Backend.Docker
             Func<IAttributeSection?, ILoadBalancerConfiguration> loadBalancerConfigurationFactory)
             => new DockerBackendServiceConfiguration(
                 Name: attributes.Name,
+                Protocol: attributes.GetString(Tokens.Protocol),
                 Port: attributes.GetValue<int>(Tokens.Port),
                 // TODO: Select network by name
                 IPAddress: IPAddress.Parse(networks.Values.First().IPAddress),

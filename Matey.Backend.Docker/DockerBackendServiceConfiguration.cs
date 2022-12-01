@@ -6,6 +6,7 @@ namespace Matey.Backend.Docker
 
     public record DockerBackendServiceConfiguration(
         string Name,
+        string? Protocol,
         IPAddress IPAddress,
         int? Port,
         int? Weight,

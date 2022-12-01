@@ -97,17 +97,17 @@
             IFrontend frontend = SelectedFrontend(configuration);
             foreach (IBackendServiceConfiguration backend in configuration.Backends)
             {
-                IPEndPoint ipEndPoint = new IPEndPoint(backend.IPAddress, backend.Port ?? 80);
+                ApplicationRequestEndpoint endpoint = backend.ToApplicationRequestEndpoint();
 
                 try
                 {
-                    frontend.RemoveRequestRoutes(new ApplicationRequestEndpoint("http", ipEndPoint, backend.Weight));
+                    frontend.RemoveRequestRoutes(endpoint);
 
-                    logger.LogInformation("Removed route {0} -> {1}.", configuration.Domain, ipEndPoint);
+                    logger.LogInformation("Removed route {0} -> {1}.", configuration.Domain, endpoint.IPEndPoint);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to remove route to {1}.", ipEndPoint);
+                    logger.LogError(ex, "Failed to remove route {0} -> {1}.", configuration.Domain, endpoint.IPEndPoint);
                 }
             }
 

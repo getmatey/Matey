@@ -11,8 +11,10 @@ namespace Matey
         internal static ApplicationRequestEndpoint ToApplicationRequestEndpoint(this IBackendServiceConfiguration backendServiceConfiguration)
         {
             return new ApplicationRequestEndpoint(
-                Scheme: "http",
-                IPEndPoint: new IPEndPoint(backendServiceConfiguration.IPAddress, backendServiceConfiguration.Port ?? 80),
+                Scheme: backendServiceConfiguration.Protocol ?? BackendServiceConfigurationDefaults.Protocol,
+                IPEndPoint: new IPEndPoint(
+                    backendServiceConfiguration.IPAddress,
+                    backendServiceConfiguration.Port ?? BackendServiceConfigurationDefaults.Port),
                 Weight: backendServiceConfiguration.Weight);
         }
 
