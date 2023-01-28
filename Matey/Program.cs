@@ -8,7 +8,16 @@ using Matey.Rules;
 using MediatR;
 
 IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
+    .ConfigureAppConfiguration((context, configuration) =>
+    {
+        string serviceName = context.HostingEnvironment.ApplicationName.ToLower();
+        string environment = context.HostingEnvironment.EnvironmentName;
+        
+        configuration
+            .AddJsonFile($"{serviceName}.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"{serviceName}.{environment}.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"{serviceName}.local.json", optional: true, reloadOnChange: false);
+    }).ConfigureServices((context, services) =>
     {
         IConfiguration configuration = context.Configuration;
 

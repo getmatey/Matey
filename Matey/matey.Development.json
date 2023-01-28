@@ -9,5 +9,6 @@
     "Endpoint": "npipe://./pipe/docker_engine"
   },
   "IIS": {
+    "ServerName": null
   }
 }
