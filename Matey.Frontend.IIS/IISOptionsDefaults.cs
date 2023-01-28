@@ -4,5 +4,6 @@
     {
         internal const string WebFarmDelimiter = ".";
         internal const string WebFarmSuffix = "matey";
+        internal const string ServerName = null;
     }
 }
