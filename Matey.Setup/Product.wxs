@@ -114,7 +114,7 @@
 			</Component>
 
 			<Component Id="ProductConfigurationComponent" Directory="INSTALLFOLDER" Guid="7adbeb16-5195-4e36-91c4-87bc3935a861">
-				<File Id="appsettings.json" KeyPath="yes" Source="$(var.Matey.TargetDir)appsettings.json" />
+				<File Id="matey.json" KeyPath="yes" Source="$(var.Matey.TargetDir)matey.json" />
 			</Component>
 		
 			<Component Id="ProductWinNet6.0Component" Directory="WINNET6.0FOLDER" Guid="1d3fb49d-9afe-412e-87c2-556c6c870d6f">
