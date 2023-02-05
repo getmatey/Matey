@@ -116,10 +116,6 @@
 			<Component Id="ProductConfigurationComponent" Directory="INSTALLFOLDER" Guid="7adbeb16-5195-4e36-91c4-87bc3935a861">
 				<File Id="appsettings.json" KeyPath="yes" Source="$(var.Matey.TargetDir)appsettings.json" />
 			</Component>
-			
-			<Component Id="ProductRefComponent" Directory="REFFOLDER" Guid="41c246e8-bc83-4cab-ab90-e1ce5cfcdd4c">
-				<File Id="ref_Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)ref\Matey.dll" />
-			</Component>
 		
 			<Component Id="ProductWinNet6.0Component" Directory="WINNET6.0FOLDER" Guid="1d3fb49d-9afe-412e-87c2-556c6c870d6f">
 				<File Id="win_net6.0_System.Diagnostics.EventLog.dll" KeyPath="no" Source="$(var.Matey.TargetDir)runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll" />
