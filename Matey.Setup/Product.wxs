@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="5f8aac84-f328-406a-93ea-347760aeeca0" Name="Matey" Language="1033" Version="1.0.0.0" Manufacturer="The Matey Crew" UpgradeCode="30b808de-7b03-4f8b-89a9-30a4b90bce00">
+	<Product Id="5f8aac84-f328-406a-93ea-347760aeeca0" Name="Matey" Language="1033" Version="!(bind.fileVersion.MateyEXE)" Manufacturer="The Matey Crew" UpgradeCode="30b808de-7b03-4f8b-89a9-30a4b90bce00">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
