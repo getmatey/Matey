@@ -1,4 +1,4 @@
-﻿using Matey.Frontend.Abstractions.Rules;
+﻿using Matey.WebServer.Abstractions.Rules;
 using System.Collections.Immutable;
 
 namespace Matey.Rules

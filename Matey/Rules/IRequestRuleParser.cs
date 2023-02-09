@@ -1,6 +1,6 @@
 ﻿namespace Matey.Rules
 {
-    using Frontend.Abstractions.Rules;
+    using WebServer.Abstractions.Rules;
 
     public interface IRequestRuleParser
     {

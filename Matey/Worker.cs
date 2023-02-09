@@ -1,14 +1,14 @@
 namespace Matey
 {
-    using Backend.Abstractions;
+    using ConfigurationSource.Abstractions;
 
     public class Worker : BackgroundService
     {
         private readonly IServiceBroker broker;
-        private readonly IBackend backend;
+        private readonly IConfigurationSource backend;
         private readonly ILogger<Worker> _logger;
 
-        public Worker(IServiceBroker broker, IBackend backend, ILogger<Worker> logger)
+        public Worker(IServiceBroker broker, IConfigurationSource backend, ILogger<Worker> logger)
         {
             this.broker = broker;
             this.backend = backend;

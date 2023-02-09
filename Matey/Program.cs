@@ -1,10 +1,10 @@
 using Matey;
-using Matey.Backend.Abstractions;
-using Matey.Backend.Docker;
 using Matey.Common;
 using Matey.Common.Microsoft.DependencyInjection;
-using Matey.Frontend.IIS;
+using Matey.ConfigurationSource.Abstractions;
+using Matey.ConfigurationSource.Docker;
 using Matey.Rules;
+using Matey.WebServer.IIS;
 using MediatR;
 
 IHost host = Host.CreateDefaultBuilder(args)

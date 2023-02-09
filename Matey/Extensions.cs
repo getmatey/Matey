@@ -1,11 +1,12 @@
-﻿using Matey.Backend.Abstractions;
-using Matey.Frontend.Abstractions;
-using Matey.Frontend.Abstractions.Rules;
-using Matey.Rules;
-using System.Net;
+﻿using System.Net;
 
 namespace Matey
 {
+    using ConfigurationSource.Abstractions;
+    using Rules;
+    using WebServer.Abstractions;
+    using WebServer.Abstractions.Rules;
+
     internal static class Extensions
     {
         internal static ApplicationRequestEndpoint ToApplicationRequestEndpoint(this IBackendServiceConfiguration backendServiceConfiguration)

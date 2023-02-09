@@ -71,13 +71,13 @@
 				<File Id="Matey.deps.json" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.deps.json" />
 				<File Id="Matey.runtimeconfig.json" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.runtimeconfig.json" />
 				<File Id="Matey.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.dll" />
-				<File Id="Matey.Backend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Backend.Abstractions.dll" />
-				<File Id="Matey.Backend.Docker.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Backend.Docker.dll" />
+				<File Id="Matey.ConfigurationSource.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.ConfigurationSource.Abstractions.dll" />
+				<File Id="Matey.ConfigurationSource.Docker.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.ConfigurationSource.Docker.dll" />
 				<File Id="Matey.Common.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.dll" />
 				<File Id="Matey.Common.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Common.Microsoft.DependencyInjection.dll" />
-				<File Id="Matey.Frontend.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Abstractions.dll" />
-				<File Id="Matey.Frontend.IIS.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.IIS.dll" />
-				<File Id="Matey.Frontend.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.Frontend.Microsoft.DependencyInjection.dll" />
+				<File Id="Matey.WebServer.Abstractions.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.WebServer.Abstractions.dll" />
+				<File Id="Matey.WebServer.IIS.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.WebServer.IIS.dll" />
+				<File Id="Matey.WebServer.Microsoft.DependencyInjection.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Matey.WebServer.Microsoft.DependencyInjection.dll" />
 				<File Id="Docker.DotNet.dll" KeyPath="no" Source="$(var.Matey.TargetDir)Docker.DotNet.dll" />
 				<File Id="MediatR.Contracts.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.Contracts.dll" />
 				<File Id="MediatR.dll" KeyPath="no" Source="$(var.Matey.TargetDir)MediatR.dll" />

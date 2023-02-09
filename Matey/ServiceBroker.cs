@@ -1,20 +1,19 @@
 ﻿namespace Matey
 {
-    using Backend.Abstractions;
-    using Frontend.Abstractions;
-    using Matey.Rules;
-    using System.Net;
+    using ConfigurationSource.Abstractions;
+    using Rules;
+    using WebServer.Abstractions;
 
     public class ServiceBroker : IServiceBroker
     {
-        private readonly IDictionary<string, IFrontend> frontends;
-        private readonly IEnumerable<IBackend> backends;
+        private readonly IDictionary<string, IWebServer> frontends;
+        private readonly IEnumerable<IConfigurationSource> backends;
         private readonly IRequestRuleParser requestRuleParser;
         private readonly ILogger<ServiceBroker> logger;
 
         public ServiceBroker(
-            IEnumerable<IFrontend> frontends,
-            IEnumerable<IBackend> backends,
+            IEnumerable<IWebServer> frontends,
+            IEnumerable<IConfigurationSource> backends,
             IRequestRuleParser requestRuleParser,
             ILogger<ServiceBroker> logger)
         {
@@ -25,22 +24,22 @@
         }
 
 
-        private IFrontend DefaultFrontend()
+        private IWebServer DefaultFrontend()
         {
             return frontends.First().Value;
         }
 
-        private IFrontend SelectedFrontend(IServiceConfiguration serviceConfiguration)
+        private IWebServer SelectedFrontend(IServiceConfiguration serviceConfiguration)
         {
             return serviceConfiguration.Target == null ? DefaultFrontend() : frontends[serviceConfiguration.Target];
         }
 
         public void Synchronize()
         {
-            IDictionary<IFrontend, IList<RequestRoute>> initializations = new Dictionary<IFrontend, IList<RequestRoute>>();
+            IDictionary<IWebServer, IList<RequestRoute>> initializations = new Dictionary<IWebServer, IList<RequestRoute>>();
             foreach (IServiceConfiguration serviceConfiguration in backends.SelectMany(b => b.GetRunningServiceConfigurations()))
             {
-                IFrontend frontend = SelectedFrontend(serviceConfiguration);
+                IWebServer frontend = SelectedFrontend(serviceConfiguration);
                 foreach (RequestRoute rule in serviceConfiguration.ToRequestRoutes(requestRuleParser))
                 {
                     IList<RequestRoute>? routeRules;
@@ -55,7 +54,7 @@
                 }
             }
 
-            foreach(KeyValuePair<IFrontend, IList<RequestRoute>> initialization in initializations)
+            foreach(KeyValuePair<IWebServer, IList<RequestRoute>> initialization in initializations)
             {
                 try
                 {
@@ -71,7 +70,7 @@
         public Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
         {
             IServiceConfiguration serviceConfiguration = notification.Configuration;
-            IFrontend target = SelectedFrontend(serviceConfiguration);
+            IWebServer target = SelectedFrontend(serviceConfiguration);
             IEnumerable<RequestRoute> routes = serviceConfiguration.ToRequestRoutes(requestRuleParser);
 
             foreach (RequestRoute route in routes)
@@ -94,7 +93,7 @@
         {
             IServiceConfiguration configuration = notification.Configuration;
 
-            IFrontend frontend = SelectedFrontend(configuration);
+            IWebServer frontend = SelectedFrontend(configuration);
             foreach (IBackendServiceConfiguration backend in configuration.Backends)
             {
                 ApplicationRequestEndpoint endpoint = backend.ToApplicationRequestEndpoint();
