@@ -29,7 +29,7 @@ namespace Matey
                 IRequestRule rule;
                 if (backend.Frontend.Rule is null)
                 {
-                    rule = new HostRequestRule($"{serviceConfiguration.Name}.{serviceConfiguration.Domain}");
+                    rule = new HostRequestRule($"{serviceConfiguration.Name}.{backend.Domain}");
                 }
                 else
                 {

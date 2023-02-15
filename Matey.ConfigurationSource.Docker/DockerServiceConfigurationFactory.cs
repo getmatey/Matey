@@ -17,7 +17,6 @@ namespace Matey.ConfigurationSource.Docker
                 Name: containerName,
                 Provider: "docker",
                 Target: attributes.TryGetString(Tokens.Target, out string? target) ? target : null,
-                Domain: attributes.GetString(Tokens.Domain),
                 IsEnabled: attributes.GetValue<bool>(Tokens.Enabled) ?? true,
                 Backends: attributes.Sections
                     .Where(s => !Tokens.Reserved.Contains(s.Name))

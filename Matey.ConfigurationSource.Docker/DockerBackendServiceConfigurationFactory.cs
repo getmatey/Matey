@@ -20,6 +20,7 @@ namespace Matey.ConfigurationSource.Docker
                 // TODO: Select network by name
                 IPAddress: IPAddress.Parse(networks.Values.First().IPAddress),
                 Weight: attributes.GetValue<int>(Tokens.Weight),
+                Domain: attributes.GetString(Tokens.Domain),
                 Frontend: frontendConfigurationFactory(attributes.GetSection(Tokens.Frontend)),
                 LoadBalancer: loadBalancerConfigurationFactory(attributes.GetSection(Tokens.LoadBalancer)));
     }

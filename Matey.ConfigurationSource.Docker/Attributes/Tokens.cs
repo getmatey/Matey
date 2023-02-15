@@ -17,7 +17,6 @@ namespace Matey.ConfigurationSource.Docker.Attributes
         internal static ImmutableHashSet<string> Reserved = (new string[] {
             Docker,
             Enabled,
-            Domain,
             Target
         }).ToImmutableHashSet();
     }

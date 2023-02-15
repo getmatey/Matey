@@ -14,6 +14,8 @@ namespace Matey.ConfigurationSource.Abstractions
 
         int? Weight { get; }
 
+        string Domain { get; }
+
         IFrontendServiceConfiguration Frontend { get; }
 
         ILoadBalancerConfiguration LoadBalancer { get; }

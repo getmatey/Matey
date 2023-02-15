@@ -102,11 +102,11 @@
                 {
                     frontend.RemoveRequestRoutes(endpoint);
 
-                    logger.LogInformation("Removed route {0} -> {1}.", configuration.Domain, endpoint.IPEndPoint);
+                    logger.LogInformation("Removed route {0} -> {1}.", backend.Domain, endpoint.IPEndPoint);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to remove route {0} -> {1}.", configuration.Domain, endpoint.IPEndPoint);
+                    logger.LogError(ex, "Failed to remove route {0} -> {1}.", backend.Domain, endpoint.IPEndPoint);
                 }
             }
 

@@ -10,6 +10,7 @@ namespace Matey.ConfigurationSource.Docker
         IPAddress IPAddress,
         int? Port,
         int? Weight,
+        string Domain,
         IFrontendServiceConfiguration Frontend,
         ILoadBalancerConfiguration LoadBalancer) : IBackendServiceConfiguration;
 }

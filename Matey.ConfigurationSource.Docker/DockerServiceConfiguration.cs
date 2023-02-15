@@ -9,7 +9,6 @@ namespace Matey.ConfigurationSource.Docker
         string Name,
         string Provider,
         string? Target,
-        string Domain,
         bool IsEnabled,
         ImmutableArray<IBackendServiceConfiguration> Backends) : IServiceConfiguration;
 }
