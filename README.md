@@ -3,6 +3,7 @@
 [![GitHub](https://img.shields.io/github/license/getmatey/Matey)](https://github.com/getmatey/Matey/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GitHub issues](https://img.shields.io/github/issues/getmatey/Matey)](https://github.com/getmatey/Matey/issues)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/getmatey/Matey/msbuild.yml?branch=master)](https://github.com/getmatey/Matey/actions/workflows/msbuild.yml)
 [![GitHub Repo stars](https://img.shields.io/github/stars/getmatey/Matey?style=social)](https://github.com/getmatey/Matey/stargazers)
 
 Matey is a container ingress configurator for traditional web servers. It uses container system events to set up reverse proxies and load balancers for your containers. Instead of reinventing the web server, we leverage tried and tested software.
