@@ -9,6 +9,9 @@
 		<Feature Id="ProductFeature" Title="Matey" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
 		</Feature>
+
+		<Icon Id="MateyIcon" SourceFile="..\matey-icon-lowres.ico" />
+		<Property Id="ARPPRODUCTICON" Value="MateyIcon" />
 	</Product>
 
 	<Fragment>
