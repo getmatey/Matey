@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Matey.Acme\Matey.Acme.csproj" />
     <ProjectReference Include="..\Matey.ConfigurationSource.Docker\Matey.ConfigurationSource.Docker.csproj" />
     <ProjectReference Include="..\Matey.ConfigurationSource.Abstractions\Matey.ConfigurationSource.Abstractions.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
