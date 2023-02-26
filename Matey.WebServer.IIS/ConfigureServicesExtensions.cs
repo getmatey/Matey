@@ -7,7 +7,7 @@ namespace Matey.WebServer.IIS
 {
     public static class ConfigureServicesExtensions
     {
-        public static IServiceCollection ConfigureIISFrontend(this IServiceCollection services, Action<IISOptions> configureOptions)
+        public static IServiceCollection AddIISWebServer(this IServiceCollection services, Action<IISOptions> configureOptions)
         {
             services.AddOptions<IISOptions>().Configure(configureOptions);
             services.AddTransient(sp =>

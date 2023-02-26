@@ -8,7 +8,7 @@ namespace Matey.ConfigurationSource.Docker
 
     public static class ConfigureServicesExtensions
     {
-        public static IServiceCollection ConfigureDockerBackend(
+        public static IServiceCollection AddDockerConfigurationSource(
             this IServiceCollection services,
             Action<DockerOptions> configureOptions)
         {

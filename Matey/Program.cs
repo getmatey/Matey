@@ -23,8 +23,8 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         services.AddMediatR(typeof(Worker).Assembly);
         services.AddTransient<INotifier, MediatorNotifierAdapter>();
-        services.ConfigureDockerBackend(options => configuration.Bind("Docker", options));
-        services.ConfigureIISFrontend(options => configuration.Bind("IIS", options));
+        services.AddDockerConfigurationSource(options => configuration.Bind("Docker", options));
+        services.AddIISWebServer(options => configuration.Bind("IIS", options));
         services.AddTransient<IRequestRuleParser, RequestRuleParser>();
         services.AddTransient<IServiceBroker, ServiceBroker>();
         services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
