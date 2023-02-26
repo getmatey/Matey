@@ -1,4 +1,5 @@
 using Matey;
+using Matey.Acme;
 using Matey.Common;
 using Matey.Common.Microsoft.DependencyInjection;
 using Matey.ConfigurationSource.Abstractions;
@@ -25,6 +26,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddTransient<INotifier, MediatorNotifierAdapter>();
         services.AddDockerConfigurationSource(options => configuration.Bind("Docker", options));
         services.AddIISWebServer(options => configuration.Bind("IIS", options));
+        services.AddAcmeChallengeResponder(options => configuration.Bind("Acme", options));
         services.AddTransient<IRequestRuleParser, RequestRuleParser>();
         services.AddTransient<IServiceBroker, ServiceBroker>();
         services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
