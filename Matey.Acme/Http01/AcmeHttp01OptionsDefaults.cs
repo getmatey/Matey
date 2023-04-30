@@ -1,6 +1,6 @@
-﻿namespace Matey.Acme.Http
+﻿namespace Matey.Acme.Http01
 {
-    internal static class AcmeHttpOptionsDefaults
+    internal static class AcmeHttp01OptionsDefaults
     {
         public const string HostName = "*";
         public const int Port = 80;

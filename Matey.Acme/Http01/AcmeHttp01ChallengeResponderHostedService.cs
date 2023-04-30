@@ -5,66 +5,72 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
 
-namespace Matey.Acme.Http
+namespace Matey.Acme.Http01
 {
-    public class AcmeHttpChallengeResponderHostedService : IHostedService, IDisposable
+    public class AcmeHttp01ChallengeResponderHostedService : IHostedService, IDisposable
     {
         private readonly HttpListener httpListener = new HttpListener();
-        private readonly AcmeHttpOptions options;
-        private readonly ILogger<AcmeHttpChallengeResponderHostedService> logger;
+        private readonly AcmeHttp01Options options;
+        private readonly ILogger<AcmeHttp01ChallengeResponderHostedService> logger;
         private readonly IChallengeValidationDetailsRepository repository;
 
-        public AcmeHttpChallengeResponderHostedService(
+        public AcmeHttp01ChallengeResponderHostedService(
             IOptions<AcmeOptions> options,
-            ILogger<AcmeHttpChallengeResponderHostedService> logger,
+            ILogger<AcmeHttp01ChallengeResponderHostedService> logger,
             IChallengeValidationDetailsRepository repository)
         {
-            this.options = options.Value?.Http ?? throw new ArgumentNullException(nameof(options));
+            this.options = options.Value?.Http01 ?? throw new ArgumentNullException(nameof(options));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             if (options.Bindings == null)
             {
-                httpListener.Prefixes.Add($"http://{AcmeHttpOptionsDefaults.HostName}:{AcmeHttpOptionsDefaults.Port}/");
+                httpListener.Prefixes.Add($"http://{AcmeHttp01OptionsDefaults.HostName}:{AcmeHttp01OptionsDefaults.Port}/");
             }
             else
             {
-                foreach (AcmeHttpBinding binding in options.Bindings)
+                foreach (AcmeHttp01Binding binding in options.Bindings)
                 {
-                    httpListener.Prefixes.Add($"http://{binding.HostName ?? AcmeHttpOptionsDefaults.HostName}:{binding.Port}/");
+                    httpListener.Prefixes.Add($"http://{binding.HostName ?? AcmeHttp01OptionsDefaults.HostName}:{binding.Port}/");
                 }
             }
 
             httpListener.Start();
-            while(httpListener.IsListening)
-            {
-                HttpListenerContext ctx = await Task.Factory.FromAsync(
-                    httpListener.BeginGetContext,
-                    httpListener.EndGetContext,
-                    httpListener);
 
-                string response = "";
-                try
+            Task.Factory.StartNew(async () =>
+            {
+                while (httpListener.IsListening)
                 {
-                    response = await HandleRequestAsync(ctx);
+                    HttpListenerContext ctx = await Task.Factory.FromAsync(
+                        httpListener.BeginGetContext,
+                        httpListener.EndGetContext,
+                        httpListener);
+
+                    string response = "";
+                    try
+                    {
+                        response = await HandleRequestAsync(ctx);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex.Message, ex);
+                        ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        response = "500 - Internal Server Error";
+                    }
+                    finally
+                    {
+                        byte[] buffer = Encoding.UTF8.GetBytes(response);
+                        ctx.Response.ContentLength64 = buffer.Length;
+                        await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                        ctx.Response.Close();
+                    }
                 }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex.Message, ex);
-                    ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    response = "500 - Internal Server Error";
-                }
-                finally
-                {
-                    byte[] buffer = Encoding.UTF8.GetBytes(response);
-                    ctx.Response.ContentLength64 = buffer.Length;
-                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                    ctx.Response.Close();
-                }
-            }
+            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+            return Task.CompletedTask;
         }
 
         private async Task<string> HandleRequestAsync(HttpListenerContext ctx)
