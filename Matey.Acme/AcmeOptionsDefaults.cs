@@ -16,7 +16,7 @@
                 CertificateAuthorityUri = "https://acme-staging-v02.api.letsencrypt.org/"
             }
         };
-        public const string ChallengeType = "http01";
+        public const string ChallengeType = "http-01";
         public const bool AcceptTermsOfService = false;
         public const string Environment = "Production";
     }
