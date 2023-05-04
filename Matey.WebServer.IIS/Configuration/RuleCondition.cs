@@ -18,6 +18,12 @@ namespace Matey.WebServer.IIS.Configuration
             set => element["pattern"] = value;
         }
 
+        public bool Negate
+        {
+            get => element["negate"] as bool? ?? false;
+            set => element["negate"] = value;
+        }
+
         public RuleCondition(ConfigurationElement element)
         {
             this.element = element;
