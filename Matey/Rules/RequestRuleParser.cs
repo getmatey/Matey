@@ -9,7 +9,7 @@ namespace Matey.Rules
 
         public IRequestRule Parse(string text)
         {
-            if(text.StartsWith($"{HostToken}:"))
+            if(text.StartsWith($"{HostToken}:", StringComparison.InvariantCultureIgnoreCase))
             {
                 return new HostRequestRule(text.Substring($"{HostToken}:".Length).Trim());
             }
