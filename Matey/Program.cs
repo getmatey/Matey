@@ -4,6 +4,7 @@ using Matey.Common;
 using Matey.Common.Microsoft.DependencyInjection;
 using Matey.ConfigurationSource.Abstractions;
 using Matey.ConfigurationSource.Docker;
+using Matey.Pki;
 using Matey.Rules;
 using Matey.WebServer.IIS;
 using MediatR;
@@ -26,11 +27,10 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddTransient<INotifier, MediatorNotifierAdapter>();
         services.AddDockerConfigurationSource(options => configuration.Bind("Docker", options));
         services.AddIISWebServer(options => configuration.Bind("IIS", options));
-        services.AddAcmeChallengeResponder(options => configuration.Bind("Acme", options));
+        services.AddAcmeChallengeResponder(options => configuration.Bind("PKI:ACME", options));
+        services.AddCertificateStore(options => configuration.Bind("PKI:CertificateStore"));
         services.AddTransient<IRequestRuleParser, RequestRuleParser>();
         services.AddTransient<IServiceBroker, ServiceBroker>();
-        services.AddNotificationHandler<ServiceOnlineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
-        services.AddNotificationHandler<ServiceOfflineNotification>(sp => sp.GetRequiredService<IServiceBroker>());
         services.AddHostedService<Worker>();
     })
     .UseWindowsService(c => c.ServiceName = "Matey Configurator Service")
