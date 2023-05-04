@@ -37,11 +37,12 @@ namespace Matey
                 }
 
                 yield return new RequestRoute(
-                    rule,
+                    $"{serviceConfiguration.Name}.{backend.Name}",
+                    rule.And(new PathRequestRule("/.well-known/acme-challenge/.*").Not()),
                     backend.ToApplicationRequestEndpoint(),
                     new RequestRouteStickinessSettings(
                         stickinessConfiguration.IsEnabled ?? false,
-                        stickinessConfiguration.CookieName));
+                        stickinessConfiguration.CookieName ?? "_Matey"));
             }
         }
     }

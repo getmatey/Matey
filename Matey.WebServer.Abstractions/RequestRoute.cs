@@ -3,7 +3,8 @@
 namespace Matey.WebServer.Abstractions
 {
     public record RequestRoute(
+        string ServiceName,
         IRequestRule Rule,
         ApplicationRequestEndpoint Endpoint,
-        RequestRouteStickinessSettings StickinessSettings);
+        RequestRouteStickinessSettings? StickinessSettings = null);
 }
