@@ -19,6 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Matey.Acme.Tests.Integration" />
+    <InternalsVisibleTo Include="Matey.Tests.Integration" />
   </ItemGroup>
 </Project>
