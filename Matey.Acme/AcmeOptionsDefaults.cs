@@ -8,12 +8,14 @@
             new AcmeEnvironmentOptions()
             {
                 Name = "Production",
-                CertificateAuthorityUri = "https://acme-v02.api.letsencrypt.org/"
+                CertificateAuthorityUri = "https://acme-v02.api.letsencrypt.org/",
+                UsePostAsGet = true
             },
             new AcmeEnvironmentOptions()
             {
                 Name = "Staging",
-                CertificateAuthorityUri = "https://acme-staging-v02.api.letsencrypt.org/"
+                CertificateAuthorityUri = "https://acme-staging-v02.api.letsencrypt.org/",
+                UsePostAsGet = true
             }
         };
         public const string ChallengeType = "http-01";

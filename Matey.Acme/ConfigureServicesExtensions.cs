@@ -1,5 +1,4 @@
 ﻿using ACMESharp.Protocol;
-using ACMESharp.Protocol.Resources;
 using Matey.Acme.Http01;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -12,23 +11,27 @@ namespace Matey.Acme
             this IServiceCollection services,
             Action<AcmeOptions> configureOptions)
         {
-            services.AddOptions<AcmeOptions>().Configure(configureOptions).PostConfigure(options =>
-            {
-                AcmeEnvironmentOptions environment = options.GetActiveEnvironment();
+            services.AddOptions<AcmeOptions>().Configure(configureOptions);
 
-                if (environment.IsStaging())
+            services.AddSingleton(sp =>
+            {
+                IOptions<AcmeOptions>? options = sp.GetService<IOptions<AcmeOptions>>();
+                AcmeEnvironmentOptions? environment = options?.Value?.GetActiveEnvironment();
+
+                if (environment?.CertificateAuthorityUri != null)
                 {
-                    services.AddSingleton<StagingCertificateStore>();
+                    return new AcmeProtocolClient(new Uri(environment.CertificateAuthorityUri), usePostAsGet: environment.UsePostAsGet);
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    return null;
                 }
-
-                services.AddSingleton(sp => new AcmeProtocolClient(new Uri(environment.CertificateAuthorityUri)));
             });
-            services.AddTransient<IChallengeValidationDetailsRepository, MemoryChallengeValidationDetailsRepository>();
-            services.AddHostedService<AcmeHttp01ChallengeResponderHostedService>();
+            services.AddSingleton<Http01ChallengeValidationDetailsRepository>()
+                .AddSingleton<IChallengeValidationDetailsRepository, Http01ForwardingChallengeValidationDetailsRepository>();
+            services.AddSingleton<AcmeHttp01ChallengeResponderHostedService>()
+                .AddHostedService(sp => sp.GetRequiredService<AcmeHttp01ChallengeResponderHostedService>());
+            services.AddTransient<IAcmeCertificateIssuer, AcmeCertificateIssuer>();
 
             return services;
         }
