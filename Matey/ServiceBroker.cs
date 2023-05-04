@@ -1,7 +1,10 @@
 ﻿namespace Matey
 {
     using ConfigurationSource.Abstractions;
+    using Matey.Acme;
+    using Matey.WebServer.Abstractions.Rules;
     using Rules;
+    using System.Security.Cryptography.X509Certificates;
     using WebServer.Abstractions;
 
     public class ServiceBroker : IServiceBroker
@@ -9,17 +12,20 @@
         private readonly IDictionary<string, IWebServer> frontends;
         private readonly IEnumerable<IConfigurationSource> backends;
         private readonly IRequestRuleParser requestRuleParser;
+        private readonly IAcmeCertificateIssuer certificateIssuer;
         private readonly ILogger<ServiceBroker> logger;
 
         public ServiceBroker(
             IEnumerable<IWebServer> frontends,
             IEnumerable<IConfigurationSource> backends,
             IRequestRuleParser requestRuleParser,
+            IAcmeCertificateIssuer certificateIssuer,
             ILogger<ServiceBroker> logger)
         {
             this.frontends = frontends.ToDictionary(f => f.Name);
             this.backends = backends;
             this.requestRuleParser = requestRuleParser;
+            this.certificateIssuer = certificateIssuer;
             this.logger = logger;
         }
 
@@ -67,7 +73,7 @@
             }
         }
 
-        public Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
+        public async Task HandleAsync(ServiceOnlineNotification notification, CancellationToken cancellationToken)
         {
             IServiceConfiguration serviceConfiguration = notification.Configuration;
             IWebServer target = SelectedFrontend(serviceConfiguration);
@@ -79,6 +85,13 @@
                 {
                     target.AddRequestRoute(route);
 
+                    HostRequestRule hostRequestRule = route.Rule.ToEnumerable().OfType<HostRequestRule>().First();
+                    if (target.CertificateStore != null)
+                    {
+                        X509Certificate2 certificate = await certificateIssuer.OrderCertificateAsync(hostRequestRule.Host);
+                        
+                        await target.CertificateStore.InstallCertificateAsync(certificate);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -86,7 +99,6 @@
                 }
             }
 
-            return Task.CompletedTask;
         }
 
         public Task HandleAsync(ServiceOfflineNotification notification, CancellationToken cancellationToken)
