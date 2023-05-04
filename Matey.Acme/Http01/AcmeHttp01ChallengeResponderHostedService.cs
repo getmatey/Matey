@@ -12,12 +12,14 @@ namespace Matey.Acme.Http01
         private readonly HttpListener httpListener = new HttpListener();
         private readonly AcmeHttp01Options options;
         private readonly ILogger<AcmeHttp01ChallengeResponderHostedService> logger;
-        private readonly IChallengeValidationDetailsRepository repository;
+        private readonly Http01ChallengeValidationDetailsRepository repository;
+
+        public int Port => options.Bindings.First().Port;
 
         public AcmeHttp01ChallengeResponderHostedService(
             IOptions<AcmeOptions> options,
             ILogger<AcmeHttp01ChallengeResponderHostedService> logger,
-            IChallengeValidationDetailsRepository repository)
+            Http01ChallengeValidationDetailsRepository repository)
         {
             this.options = options.Value?.Http01 ?? throw new ArgumentNullException(nameof(options));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -75,15 +77,15 @@ namespace Matey.Acme.Http01
 
         private async Task<string> HandleRequestAsync(HttpListenerContext ctx)
         {
-            string fullPath = ctx.Request.Url.ToString().Trim('/');
+            Uri uri = new Uri(ctx.Request.Url.ToString().Trim('/'));
 
             try
             {
-                IChallengeValidationDetails details = await repository.FindAsync(fullPath);
+                IChallengeValidationDetails details = await repository.FindAsync(uri.PathAndQuery);
 
                 if (details is Http01ChallengeValidationDetails httpDetails)
                 {
-                    logger.LogInformation("Challenge '{0}' found, responding with '{1}'.", fullPath, httpDetails.HttpResourceValue);
+                    logger.LogInformation("Challenge '{0}' found, responding with '{1}'.", uri.PathAndQuery, httpDetails.HttpResourceValue);
                     ctx.Response.ContentType = httpDetails.HttpResourceContentType;
                     ctx.Response.StatusCode = (int)HttpStatusCode.OK;
 
@@ -91,7 +93,7 @@ namespace Matey.Acme.Http01
                 }
                 else
                 {
-                    throw new AcmeChallengeDetailsNotFoundException($"Challenge '{fullPath}' is not a HTTP-01 challenge.");
+                    throw new AcmeChallengeDetailsNotFoundException($"Challenge '{uri.PathAndQuery}' is not a HTTP-01 challenge.");
                 }
             }
             catch (AcmeChallengeDetailsNotFoundException ex)

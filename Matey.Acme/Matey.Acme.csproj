@@ -15,5 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
+    <ProjectReference Include="..\Matey.WebServer.Abstractions\Matey.WebServer.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Matey.Acme.Tests.Integration" />
   </ItemGroup>
 </Project>
