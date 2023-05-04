@@ -8,7 +8,30 @@
   "Docker": {
     "Endpoint": "npipe://./pipe/docker_engine"
   },
-  "IIS": {
-    "ServerName": null
+  "PKI": {
+    "ACME": {
+      "AcceptTermsOfService": true,
+      "AccountContactEmails": [ "joe.bloggs@example.com" ],
+      "Environment": "Development",
+      "Environments": [
+        {
+          "Name": "Development",
+          "CertificateAuthorityUri": "https://localhost/acme/acme/",
+          "UsePostAsGet": true
+        }
+      ],
+      "Http01": {
+        "Bindings": [
+          {
+            "HostName": "*",
+            "Port": 8080
+          }
+        ]
+      }
+    },
+    "CertificateStore": {
+      "StoreLocation": "LocalMachine",
+      "StoreName": "Root"
+    }
   }
 }
