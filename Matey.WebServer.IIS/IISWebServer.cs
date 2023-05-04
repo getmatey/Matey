@@ -6,6 +6,8 @@ namespace Matey.WebServer.IIS
     using Abstractions;
     using Abstractions.Rules;
     using Configuration;
+    using Matey.Pki;
+    using System.Net;
 
     public class IISWebServer : IWebServer
     {
@@ -14,15 +16,20 @@ namespace Matey.WebServer.IIS
 
         public string Name => "IIS";
 
-        public IISWebServer(IOptions<IISOptions> options, Administration.ServerManager serverManager)
+        public ICertificateStore CertificateStore { get; }
+
+        public IPAddress CallbackIPAddress => IPAddress.Loopback;
+
+        public IISWebServer(IOptions<IISOptions> options, Administration.ServerManager serverManager, ICertificateStore certificateStore = null)
         {
             this.options = options;
             this.serverManager = serverManager;
+            CertificateStore = certificateStore;
         }
 
-        private string CreateWebFarmName(HostRequestRule hostRequestRule)
+        private string CreateWebFarmName(RequestRoute route)
         {
-            return $"{hostRequestRule.Host}{options.Value.WebFarmDelimiter}{options.Value.WebFarmSuffix}";
+            return $"{route.ServiceName}{options.Value.WebFarmDelimiter}{options.Value.WebFarmSuffix}";
         }
 
         private WebFarm AddRequestRouteWithoutCommit(
@@ -30,48 +37,66 @@ namespace Matey.WebServer.IIS
             WebFarmCollection webFarms,
             RulesCollection globalRules)
         {
-            string webFarmName;
+            WebFarm webFarm;
+            Rule rewriteRule = globalRules.CreateRule();
+            string webFarmName = CreateWebFarmName(route);
 
-            if (route.Rule is HostRequestRule hostRule)
+            if (!webFarms.TryGet(webFarmName, out webFarm))
             {
-                webFarmName = CreateWebFarmName(hostRule);
-                WebFarm webFarm;
-                if (!webFarms.TryGet(webFarmName, out webFarm))
+                webFarm = webFarms.CreateWebFarm();
+                webFarm.Name = webFarmName;
+                webFarms.Add(webFarm);
+            }
+
+            rewriteRule.Name = webFarm.RewriteRuleName;
+            rewriteRule.StopProcessing = true;
+            rewriteRule.Match.Url = ".*";
+            rewriteRule.Action.Type = "Rewrite";
+            rewriteRule.Action.Url = $"http://{webFarmName}/{{R:0}}";
+
+            foreach (IRequestRule iteratedRule in route.Rule.ToEnumerable())
+            {
+                IRequestRule rule = iteratedRule;
+                RuleCondition condition = rewriteRule.Conditions.CreateRuleCondition();
+                if (rule is NotRequestRule notRule)
                 {
-                    webFarm = webFarms.CreateWebFarm();
-                    webFarm.Name = webFarmName;
-                    webFarms.Add(webFarm);
-
-                    Rule rewriteRule = globalRules.CreateRule();
-                    rewriteRule.Name = webFarm.RewriteRuleName;
-                    rewriteRule.StopProcessing = true;
-                    rewriteRule.Match.Url = ".*";
-                    rewriteRule.Action.Type = "Rewrite";
-                    rewriteRule.Action.Url = $"http://{webFarmName}/{{R:0}}";
-
-                    RuleCondition condition = rewriteRule.Conditions.CreateRuleCondition();
-                    condition.Input = "{HTTP_HOST}";
-                    condition.Pattern = hostRule.Host;
-                    rewriteRule.Conditions.Add(condition);
-
-                    globalRules.Add(rewriteRule);
+                    condition.Negate = true;
+                    rule = notRule.Rule;
                 }
 
+                if (rule is HostRequestRule hostRule)
+                {
+                    condition.Input = "{HTTP_HOST}";
+                    condition.Pattern = hostRule.Host;
+                }
+                else if (rule is PathRequestRule pathRule)
+                {
+                    condition.Input = "{URL}";
+                    condition.Pattern = pathRule.PathPattern;
+                }
+                else
+                {
+                    continue;
+                }
+
+                rewriteRule.Conditions.Add(condition);
+            }
+
+            globalRules.Add(rewriteRule);
+
+            if (route.StickinessSettings != null)
+            {
                 webFarm.ApplicationRequestRouting.Affinity.UseCookie = route.StickinessSettings.IsSticky;
                 webFarm.ApplicationRequestRouting.Affinity.CookieName = route.StickinessSettings.CookieName;
-
-                WebFarmServer server = webFarm.CreateServer();
-                server.Address = route.Endpoint.IPEndPoint.Address.ToString();
-                server.ApplicationRequestRouting.HttpPort = route.Endpoint.IPEndPoint.Port;
-                server.ApplicationRequestRouting.Weight = route.Endpoint.Weight ?? 100;
-                webFarm.Add(server);
-
-                return webFarm;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            WebFarmServer server = webFarm.CreateServer();
+            server.Address = route.Endpoint.IPEndPoint.Address.ToString();
+            server.ApplicationRequestRouting.HttpPort = route.Endpoint.IPEndPoint.Port;
+            server.ApplicationRequestRouting.Weight = route.Endpoint.Weight ?? 100;
+            webFarm.Add(server);
+
+            return webFarm;
         }
 
         public void AddRequestRoute(RequestRoute route)
