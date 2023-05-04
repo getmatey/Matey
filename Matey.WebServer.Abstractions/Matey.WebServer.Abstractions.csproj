@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
+    <ProjectReference Include="..\Matey.Pki\Matey.Pki.csproj" />
   </ItemGroup>
 
 </Project>

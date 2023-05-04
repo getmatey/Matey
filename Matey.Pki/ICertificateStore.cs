@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 
-namespace Matey.Acme
+namespace Matey.Pki
 {
     public interface ICertificateStore
     {

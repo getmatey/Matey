@@ -26,6 +26,7 @@
     <ProjectReference Include="..\Matey.ConfigurationSource.Docker\Matey.ConfigurationSource.Docker.csproj" />
     <ProjectReference Include="..\Matey.ConfigurationSource.Abstractions\Matey.ConfigurationSource.Abstractions.csproj" />
     <ProjectReference Include="..\Matey.Common\Matey.Common.csproj" />
+    <ProjectReference Include="..\Matey.Pki\Matey.Pki.csproj" />
     <ProjectReference Include="..\Matey.WebServer.IIS\Matey.WebServer.IIS.csproj" />
   </ItemGroup>
 </Project>
